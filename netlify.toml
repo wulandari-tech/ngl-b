@@ -1,25 +1,17 @@
-# File: netlify.toml
 
 [build]
-  # Perintah untuk menginstal dependensi
   command = "npm install"
-  # Direktori tempat Netlify Function berada
   functions = "netlify/functions"
-  # Direktori yang berisi aset statis (walaupun Express yang akan menyajikannya)
   publish = "public"
 
-# Pengaturan untuk Node.js runtime (opsional tapi bagus)
 [functions]
   node_bundler = "esbuild"
   [functions."*"]
-    node_version = "18" # Sesuaikan dengan versi Node.js yang Anda inginkan/gunakan
+    node_version = "18"
+    # Tambahkan baris ini:
+    included_files = ["models/**"]
 
-# Aturan rewrite untuk mengarahkan SEMUA permintaan ke function Express
 [[redirects]]
-  # Tangkap semua path
   from = "/*"
-  # Arahkan ke function 'api' yang kita buat
   to = "/.netlify/functions/api/:splat"
-  # Status 200 berarti ini adalah rewrite internal, bukan redirect browser
   status = 200
-  # force = true # Gunakan jika ada konflik dengan file di direktori publish
