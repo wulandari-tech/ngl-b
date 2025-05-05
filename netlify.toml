@@ -1,0 +1,18 @@
+# File: netlify.toml (Contoh Penambahan)
+
+[build]
+  command = "npm install"
+  functions = "netlify/functions"
+  publish = "public"
+
+[functions]
+  node_bundler = "esbuild"
+  [functions."*"]
+    node_version = "18"
+    # Tambahkan baris ini:
+    included_files = ["models/**"]
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
