@@ -8,7 +8,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 // Models
-const User = require('./models/User');
+const User = require('./models/user');
 const Message = require('./models/Message');
 
 const app = express();
