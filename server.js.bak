@@ -9,7 +9,7 @@ const MongoStore = require('connect-mongo');
 
 // Models
 const User = require('./models/user');
-const Message = require('./models/message');
+const Message = require('./models/Message');
 
 const app = express();
 const server = http.createServer(app);
