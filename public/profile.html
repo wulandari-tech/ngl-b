@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>anonim</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .profile-page-body {
+            background: linear-gradient(135deg, #f8b195, #f67280, #c06c84);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 0;
+            margin: 0;
+        }
+
+        .profile-container {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 35px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .profile-recipient {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .profile-recipient strong {
+            font-size: 1.5em;
+            color: #333;
+            display: block;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .profile-container textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            min-height: 120px;
+            margin-bottom: 15px;
+            resize: vertical;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .profile-container textarea:focus {
+            border-color: #f67280;
+            outline: none;
+            box-shadow: 0 0 8px rgba(246, 114, 128, 0.3);
+        }
+
+        .profile-container button#send-button {
+            background-color: #f67280;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            width: 100%;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            margin-bottom: 15px;
+        }
+        .profile-container button#send-button i {
+            margin-right: 8px;
+        }
+
+        .profile-container button#send-button:hover {
+            background-color: #c06c84;
+        }
+        .profile-container button#send-button:active {
+             transform: scale(0.98);
+        }
+        .profile-container button#send-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .profile-container .message {
+            min-height: 1.2em;
+            font-weight: bold;
+            margin-top: 0;
+            padding: 8px 0;
+            border: none;
+            background: none;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .profile-container .message.info { color: #555; }
+        .profile-container .message.success { color: #28a745; }
+        .profile-container .message.error { color: #dc3545; }
+
+
+        .profile-footer {
+            margin-top: 25px;
+            font-size: 0.9em;
+        }
+        .profile-footer a {
+            color: #6c757d;
+            text-decoration: none;
+        }
+        .profile-footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .profile-container {
+                width: 95%;
+                padding: 25px 20px;
+            }
+            .profile-recipient strong { font-size: 1.3em; }
+        }
+    </style>
+</head>
+<body class="profile-page-body">
+    <div class="profile-container">
+        <h2 class="profile-recipient">
+            kirimkan pesan anonim ke <br>
+            <strong id="profile-username-display">...</strong>
+        </h2>
+
+        <form id="send-message-form">
+            <textarea id="message-content" rows="5" placeholder="kirimkan pesan rahasia apapun..." required></textarea>
+            <button type="submit" id="send-button"><i class="fas fa-paper-plane"></i> Kirim!</button>
+            <p id="send-status" class="message"></p>
+        </form>
+
+        <div class="profile-footer">
+             <a href="/">buat NGL link anda sendiri!</a>
+        </div>
+    </div>
+
+    <script>
+        const pathParts = window.location.pathname.split('/');
+        const recipientUsername = pathParts[pathParts.length - 1] || 'pengguna';
+
+        document.title = `Kirim pesan ke ${recipientUsername} | NGL Clone`;
+        document.getElementById('profile-username-display').textContent = recipientUsername;
+
+        const messageForm = document.getElementById('send-message-form');
+        const messageContent = document.getElementById('message-content');
+        const sendStatus = document.getElementById('send-status');
+        const sendButton = document.getElementById('send-button');
+        const originalButtonHTML = sendButton.innerHTML;
+
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const contentToSend = messageContent.value.trim();
+            if (!contentToSend) {
+                sendStatus.textContent = 'Pesan tidak boleh kosong.';
+                sendStatus.className = 'message error';
+                setTimeout(() => { sendStatus.textContent = ''; sendStatus.className = 'message';}, 3000);
+                return;
+            }
+
+            sendStatus.textContent = 'Mengirim...';
+            sendStatus.className = 'message info';
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
+            try {
+                const response = await fetch(`/api/messages/${recipientUsername}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: contentToSend })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    sendStatus.textContent = result.message || 'Pesan berhasil dikirim!';
+                    sendStatus.className = 'message success';
+                    messageContent.value = '';
+                } else {
+                    sendStatus.textContent = result.message || 'Gagal mengirim pesan.';
+                    sendStatus.className = 'message error';
+                }
+            } catch (error) {
+                sendStatus.textContent = 'Terjadi kesalahan. Coba lagi.';
+                sendStatus.className = 'message error';
+            } finally {
+                 sendButton.disabled = false;
+                 sendButton.innerHTML = originalButtonHTML;
+                 setTimeout(() => {
+                    if (!sendStatus.classList.contains('success')) {
+                       sendStatus.textContent = '';
+                       sendStatus.className = 'message';
+                    }
+                 }, 4000);
+            }
+        });
+    </script>
+</body>
+</html>

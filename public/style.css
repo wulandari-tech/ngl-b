@@ -1,0 +1,338 @@
+/* === Gaya Dasar & Global === */
+body {
+    font-family: sans-serif;
+    margin: 0; /* Hapus margin default body jika tidak perlu */
+    background-color: #f4f4f4; /* Background default untuk halaman selain profil */
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto; /* Margin atas/bawah dan auto kiri/kanan */
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px; /* Sedikit lebih bulat */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px; /* Jarak bawah default */
+}
+
+h1 {
+    margin-top: 0; /* Hapus margin atas jika container punya padding */
+}
+
+input[type="text"],
+input[type="password"],
+textarea {
+    width: 100%; /* Default full width */
+    padding: 12px; /* Padding lebih nyaman */
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px; /* Sudut input */
+    box-sizing: border-box; /* Padding dan border masuk dalam width */
+    font-size: 1em;
+}
+
+textarea {
+    resize: vertical; /* Hanya bisa resize vertikal */
+    min-height: 80px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    border-color: #5cb85c; /* Warna highlight hijau */
+    outline: none;
+    box-shadow: 0 0 5px rgba(92, 184, 92, 0.3);
+}
+
+button {
+    background-color: #5cb85c; /* Hijau default */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #4cae4c; /* Hijau lebih gelap saat hover */
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* === Status Messages (Default) === */
+.message {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    min-height: 1.2em; /* Agar layout tidak lompat */
+}
+.message.success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb;}
+.message.error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb;}
+.message.info { color: #0c5460; background-color: #d1ecf1; border: 1px solid #bee5eb;} /* Untuk 'sending' dll */
+
+
+/* === Gaya Halaman Login/Register (index.html) === */
+.auth-container {
+    max-width: 400px; /* Container lebih kecil */
+}
+
+.auth-form {
+    border-bottom: none; /* Hapus border jika tidak diperlukan lagi */
+    margin-bottom: 0;
+    padding-bottom: 10px;
+}
+
+.auth-form h2 {
+    margin-bottom: 20px;
+    font-size: 1.6em;
+    color: #444;
+}
+
+.auth-container button {
+    width: 100%; /* Tombol jadi full width */
+    padding: 12px;
+    font-size: 1.1em;
+    margin-top: 5px; /* Beri sedikit jarak */
+}
+
+.switch-form {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+
+.switch-form a {
+    color: #5cb85c; /* Warna hijau seperti tombol */
+    text-decoration: none;
+    font-weight: bold;
+}
+.switch-form a:hover {
+    text-decoration: underline;
+}
+
+/* === Gaya Halaman Inbox (inbox.html) === */
+#ngl-link {
+    font-weight: bold;
+    word-break: break-all; /* Agar link panjang tidak merusak layout */
+}
+
+#copy-link-button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 0.8em;
+    vertical-align: middle; /* Sejajarkan dengan teks link */
+}
+
+#copy-status {
+    display: inline-block; /* Agar bisa di-style seperti inline tapi punya margin/padding */
+    margin-left: 15px;
+    padding: 5px 8px;
+}
+#copy-status:empty { /* Sembunyikan jika kosong */
+    display: none;
+}
+
+.message-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 25px;
+}
+
+.message-item {
+    background: #eef5ea; /* Warna background pesan */
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 5px;
+    border-left: 5px solid #5cb85c; /* Aksen hijau */
+    position: relative; /* Untuk tombol delete absolut jika ditambahkan */
+}
+
+.message-item p { /* Konten pesan */
+    margin: 0 0 8px 0; /* Kurangi margin bawah */
+    word-wrap: break-word; /* Pecah kata panjang */
+}
+
+.message-time {
+    font-size: 0.8em;
+    color: #777;
+    display: block;
+}
+
+/* Tombol Delete (jika ditambahkan nanti) */
+.delete-button {
+    background-color: #d9534f; /* Merah */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Bulat */
+    width: 25px;
+    height: 25px;
+    font-size: 0.8em;
+    font-weight: bold;
+    line-height: 25px; /* Vertically center 'X' */
+    text-align: center;
+    cursor: pointer;
+    position: absolute; /* Posisi relatif terhadap .message-item */
+    top: 10px;
+    right: 10px;
+    padding: 0;
+}
+.delete-button:hover {
+    background-color: #c9302c; /* Merah lebih gelap */
+}
+
+
+#logout-button {
+    background-color: #d9534f; /* Merah */
+    margin-top: 20px;
+    display: block; /* Jadi elemen block */
+    margin-left: auto; /* Dorong ke kanan */
+    margin-right: auto; /* Tengahkan jika diperlukan */
+    min-width: 100px; /* Lebar minimum */
+}
+#logout-button:hover {
+    background-color: #c9302c; /* Merah lebih gelap */
+}
+
+/* === Gaya Halaman Profil Publik (profile.html) === */
+.profile-page-body {
+    background: linear-gradient(135deg, #f8b195, #f67280, #c06c84);
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 0;
+    margin: 0; /* Reset margin default */
+    font-family: sans-serif; /* Pastikan font konsisten */
+}
+
+.profile-container {
+    background: rgba(255, 255, 255, 0.98); /* Putih sedikit transparan */
+    padding: 35px 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    margin: 0; /* Hapus margin auto karena body sudah flex */
+    box-sizing: border-box;
+}
+
+.profile-recipient {
+    font-size: 1.3em;
+    color: #555;
+    margin-bottom: 25px;
+    line-height: 1.4;
+}
+.profile-recipient strong {
+    font-size: 1.5em;
+    color: #333;
+    display: block;
+    margin-top: 5px;
+    word-break: break-all; /* Jika username sangat panjang */
+}
+
+.profile-container textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1em;
+    min-height: 120px;
+    margin-bottom: 15px;
+    resize: vertical;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+.profile-container textarea:focus {
+    border-color: #f67280; /* Warna highlight NGL */
+    outline: none;
+    box-shadow: 0 0 8px rgba(246, 114, 128, 0.3);
+}
+
+.profile-container button#send-button {
+    background-color: #f67280; /* Warna utama NGL */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-bottom: 15px;
+}
+
+.profile-container button#send-button:hover {
+    background-color: #c06c84; /* Warna lain NGL saat hover */
+}
+.profile-container button#send-button:active {
+     transform: scale(0.98); /* Efek tekan */
+}
+.profile-container button#send-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Status Message khusus profile */
+.profile-container .message {
+    min-height: 1.2em;
+    font-weight: bold;
+    margin-top: 0;
+    padding: 8px; /* Beri padding juga */
+    border: none; /* Hapus border default message */
+    background: none; /* Hapus background default message */
+}
+.profile-container .message.info { color: #555; }
+.profile-container .message.success { color: #28a745; }
+.profile-container .message.error { color: #dc3545; }
+
+
+.profile-footer {
+    margin-top: 25px;
+    font-size: 0.9em;
+}
+.profile-footer a {
+    color: #6c757d;
+    text-decoration: none;
+}
+.profile-footer a:hover {
+    text-decoration: underline;
+}
+
+/* === Responsiveness (Contoh Sederhana) === */
+@media (max-width: 600px) {
+    .container, .profile-container {
+        margin-left: 10px;
+        margin-right: 10px;
+        width: auto; /* Biarkan lebar menyesuaikan */
+        padding: 15px;
+    }
+
+    .profile-container {
+        padding: 25px 20px;
+    }
+
+    h1 { font-size: 1.8em; }
+    h2 { font-size: 1.4em; }
+    .auth-form h2 { font-size: 1.5em; }
+    .profile-recipient strong { font-size: 1.3em; }
+}
