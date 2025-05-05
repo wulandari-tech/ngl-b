@@ -1,3 +1,4 @@
+// models/user.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
@@ -8,13 +9,24 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true,
-        index: true // Penting untuk pencarian cepat
+        index: true // Indeks untuk pencarian cepat
     },
     password: {
         type: String,
         required: true
+    },
+    // TAMBAHKAN FIELD INI:
+    prompt: {
+        type: String,
+        trim: true,
+        default: "kirimi saya pesan gabut anda" // Nilai default
+    },
+    profilePictureUrl: {
+        type: String,
+        trim: true,
+        default: "https://via.placeholder.com/40" // URL gambar default/placeholder
     }
-}, { timestamps: true });
+}, { timestamps: true }); // Tambahkan timestamps otomatis
 
 // Hash password sebelum menyimpan
 userSchema.pre('save', async function(next) {
@@ -23,12 +35,12 @@ userSchema.pre('save', async function(next) {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
         next();
-    } catch (err) {
-        next(err);
+    } catch (error) {
+        next(error);
     }
 });
 
-// Method untuk membandingkan password
+// Metode untuk membandingkan password
 userSchema.methods.comparePassword = function(candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
 };

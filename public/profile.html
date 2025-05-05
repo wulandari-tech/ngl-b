@@ -6,193 +6,149 @@
     <title>Kirim Pesan Anonim</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: sans-serif;
-            margin: 0;
-            color: #333;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #000; line-height: 1.5;
+            background: linear-gradient(160deg, #ff7e5f, #feb47b, #ff708f);
+            background-attachment: fixed; display: flex; flex-direction: column;
+            justify-content: space-between; align-items: center; min-height: 100vh;
+            padding: 20px 15px;
         }
-
-        .profile-page-body {
-            background: linear-gradient(135deg, #f8b195, #f67280, #c06c84);
-            background-attachment: fixed;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px 0;
-            margin: 0;
+        .main-content {
+            width: 100%; max-width: 480px; display: flex; flex-direction: column;
+            align-items: center; flex-grow: 1; justify-content: center;
         }
-
-        .profile-container {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 35px 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            margin: 0;
-            box-sizing: border-box;
+        .message-box {
+            background-color: #fff; border-radius: 24px; padding: 16px; width: 100%;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); margin-bottom: 20px; position: relative;
         }
-
-        .profile-recipient {
-            font-size: 1.3em;
-            color: #555;
-            margin-bottom: 25px;
-            line-height: 1.4;
+        .user-header { display: flex; align-items: center; margin-bottom: 12px; }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%; margin-right: 12px;
+            object-fit: cover; background-color: #eee;
         }
-        .profile-recipient strong {
-            font-size: 1.5em;
-            color: #333;
-            display: block;
-            margin-top: 5px;
-            word-break: break-all;
+        .user-details { font-size: 0.95em; line-height: 1.3; }
+        .username { font-weight: 600; color: #000; }
+        .user-prompt { color: #555; font-size: 0.9em; word-wrap: break-word; }
+        textarea#message-content {
+            width: 100%; min-height: 100px; border: none; border-radius: 16px; padding: 15px;
+            font-size: 1.1em; color: rgba(0, 0, 0, 0.7);
+            background: linear-gradient(rgba(255, 100, 150, 0.1), rgba(255, 150, 100, 0.05));
+            resize: none; outline: none; margin-bottom: 15px; font-family: inherit;
         }
-
-        .profile-container textarea {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            min-height: 120px;
+        textarea#message-content::placeholder { color: rgba(255, 0, 100, 0.4); font-weight: 500; font-size: 1.1em; }
+        .dice-icon { position: absolute; bottom: 10px; right: 15px; font-size: 1.5em; opacity: 0.6; }
+        .anon-qa {
+            display: flex; align-items: center; justify-content: center; font-size: 0.85em; color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); margin-bottom: 15px;
+        }
+        .anon-qa i { margin-right: 6px; font-size: 0.8em; }
+        button#send-button {
+            background-color: #000; color: #fff; border: none; border-radius: 50px; padding: 14px 20px;
+            font-size: 1.1em; font-weight: 600; cursor: pointer; width: 100%; text-align: center;
             margin-bottom: 15px;
-            resize: vertical;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .profile-container textarea:focus {
-            border-color: #f67280;
-            outline: none;
-            box-shadow: 0 0 8px rgba(246, 114, 128, 0.3);
-        }
-
-        .profile-container button#send-button {
-            background-color: #f67280;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: bold;
-            width: 100%;
-            box-sizing: border-box;
             transition: background-color 0.2s ease, transform 0.1s ease;
-            margin-bottom: 15px;
         }
-        .profile-container button#send-button i {
-            margin-right: 8px;
+        button#send-button:hover { background-color: #333; }
+        button#send-button:active { transform: scale(0.98); }
+        button#send-button:disabled { background-color: #888; cursor: not-allowed; transform: none; }
+        button#send-button i.fa-spinner { margin-right: 8px; }
+        .message {
+             min-height: 1.1em; font-weight: 500; text-align: center; font-size: 0.95em; margin-bottom: 15px;
+             color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
+        .message:empty { display: none; }
+        .message.success { color: #e6ffed; }
+        .message.error { color: #ffebee; }
+        .message.info { color: #fff; }
 
-        .profile-container button#send-button:hover {
-            background-color: #c06c84;
+        .hit-counter {
+            font-size: 0.85em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px; display: flex; align-items: center; justify-content: center;
         }
-        .profile-container button#send-button:active {
-             transform: scale(0.98);
+        .hit-counter i { margin: 0 6px; font-size: 0.9em; }
+        .get-own-button {
+            display: block; background-color: #000; color: #fff; border: none; border-radius: 50px;
+            padding: 14px 20px; font-size: 1.05em; font-weight: 600; cursor: pointer; width: 100%;
+            text-align: center; text-decoration: none; margin-bottom: 30px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
-        .profile-container button#send-button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .profile-container .message {
-            min-height: 1.2em;
-            font-weight: bold;
-            margin-top: 0;
-            padding: 8px 0;
-            border: none;
-            background: none;
-            text-align: center;
-            font-size: 0.95em;
-        }
-        .profile-container .message.info { color: #555; }
-        .profile-container .message.success { color: #28a745; }
-        .profile-container .message.error { color: #dc3545; }
-
-
-        .profile-footer {
-            margin-top: 25px;
-            font-size: 0.9em;
-        }
-        .profile-footer a {
-            color: #6c757d;
-            text-decoration: none;
-        }
-        .profile-footer a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 600px) {
-            .profile-container {
-                width: 95%;
-                padding: 25px 20px;
-            }
-            .profile-recipient strong { font-size: 1.3em; }
-        }
+        .get-own-button:hover { background-color: #333; }
+        .get-own-button:active { transform: scale(0.98); }
+        .page-footer { width: 100%; text-align: center; padding-bottom: 10px; }
+        .footer-links a { font-size: 0.8em; color: rgba(255, 255, 255, 0.7); text-decoration: none; margin: 0 8px; }
+        .footer-links a:hover { text-decoration: underline; }
     </style>
 </head>
 <body class="profile-page-body">
-
-    <div class="profile-container">
-        <h2 class="profile-recipient">
-            kirimkan pesan anonim ke <br>
-            <strong id="profile-username-display">...</strong>
-        </h2>
-
-        <form id="send-message-form">
-            <textarea id="message-content" rows="5" placeholder="kirimkan pesan rahasia apapun..." required></textarea>
-            <button type="submit" id="send-button"><i class="fas fa-paper-plane"></i> Kirim!</button>
-            <p id="send-status" class="message"></p>
-        </form>
-
-        <div class="profile-footer">
-             <a href="/">Buat NGL link Anda sendiri!</a>
+    <div class="main-content">
+        <div class="message-box">
+            <div class="user-header">
+                <img src="{{AVATAR_URL}}" alt="Avatar" class="user-avatar" id="user-avatar-img">
+                <div class="user-details">
+                    <div class="username" id="profile-username-display">@{{USERNAME}}</div>
+                    <div class="user-prompt" id="profile-prompt-display">{{PROMPT_TEXT}}</div>
+                </div>
+            </div>
+            <form id="send-message-form" style="margin: 0;">
+                <textarea id="message-content" rows="4" placeholder="kirim pesan anonim padaku..." required></textarea>
+                 <span class="dice-icon">🎲</span>
+            </form>
         </div>
+
+        <div class="anon-qa">
+            <i class="fas fa-lock"></i> tanya-jawab anonim
+        </div>
+
+        <p id="send-status" class="message"></p>
+
+        <button type="submit" form="send-message-form" id="send-button">Kirim!</button>
+
+        <div class="hit-counter">
+           <i class="fas fa-hand-point-up"></i> 246 orang baru saja mengetuk tombol ini <i class="fas fa-hand-point-up fa-flip-horizontal"></i>
+        </div>
+
+        <a href="/" class="get-own-button">Dapatkan pesan untukmu sendiri!</a>
     </div>
 
+    <footer class="page-footer">
+        <div class="footer-links">
+            <a href="#">Terms</a>
+            <a href="#">Privacy</a>
+        </div>
+    </footer>
+
     <script>
-        const pathParts = window.location.pathname.split('/');
-        const recipientUsername = pathParts[pathParts.length - 1] || 'pengguna';
-
-        // Setel ulang judul di sisi klien (meskipun server mungkin sudah mengaturnya)
-        document.title = `Kirimkan pesan anonim ke ${recipientUsername}`;
-
-        document.getElementById('profile-username-display').textContent = recipientUsername;
+        const pathPartsJS = window.location.pathname.split('/');
+        const recipientUsernameJS = pathPartsJS[pathPartsJS.length - 1] || 'pengguna';
 
         const messageForm = document.getElementById('send-message-form');
         const messageContent = document.getElementById('message-content');
-        const sendStatus = document.getElementById('send-status');
         const sendButton = document.getElementById('send-button');
+        const sendStatus = document.getElementById('send-status');
         const originalButtonHTML = sendButton.innerHTML;
 
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const contentToSend = messageContent.value.trim();
             if (!contentToSend) {
                 sendStatus.textContent = 'Pesan tidak boleh kosong.';
                 sendStatus.className = 'message error';
-                setTimeout(() => { sendStatus.textContent = ''; sendStatus.className = 'message';}, 3000);
+                setTimeout(() => { sendStatus.textContent = ''; sendStatus.className = 'message'; }, 3000);
                 return;
             }
-
             sendStatus.textContent = 'Mengirim...';
             sendStatus.className = 'message info';
             sendButton.disabled = true;
             sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-
             try {
-                const response = await fetch(`/api/messages/${recipientUsername}`, {
+                const response = await fetch(`/api/messages/${recipientUsernameJS}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content: contentToSend })
                 });
-
                 const result = await response.json();
-
                 if (response.ok) {
                     sendStatus.textContent = result.message || 'Pesan berhasil dikirim!';
                     sendStatus.className = 'message success';
@@ -207,13 +163,12 @@
             } finally {
                  sendButton.disabled = false;
                  sendButton.innerHTML = originalButtonHTML;
-                 // Hapus pesan status (kecuali sukses) setelah beberapa detik
                  setTimeout(() => {
                     if (!sendStatus.classList.contains('success')) {
                        sendStatus.textContent = '';
                        sendStatus.className = 'message';
                     }
-                 }, 4000);
+                 }, 5000);
             }
         });
     </script>

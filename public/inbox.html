@@ -8,166 +8,107 @@
     <script src="/socket.io/socket.io.js"></script>
     <style>
         body {
-            font-family: sans-serif;
-            margin: 0;
-            color: #333;
-            line-height: 1.6;
+            font-family: sans-serif; margin: 0; color: #333; line-height: 1.6;
             background: linear-gradient(135deg, #f8b195, #f67280, #c06c84);
-            background-attachment: fixed;
-            padding: 20px 0;
+            background-attachment: fixed; padding: 20px 0;
         }
-
         .container {
-            max-width: 700px;
-            margin: 20px auto;
-            background: rgba(255, 255, 255, 0.98);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            max-width: 700px; margin: 20px auto; background: rgba(255, 255, 255, 0.98);
+            padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
         }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-top: 0;
-            margin-bottom: 25px;
-        }
-
-        .ngl-link-section p {
-            text-align: center;
-            margin-bottom: 5px;
-            color: #555;
-        }
-
-        #ngl-link {
-            font-weight: bold;
-            word-break: break-all;
-            color: #c06c84;
-            text-decoration: none;
-        }
-         #ngl-link:hover {
-             text-decoration: underline;
+        h1 { text-align: center; color: #333; margin-top: 0; margin-bottom: 25px; }
+        .profile-info {
+             display: flex; align-items: center; margin-bottom: 20px;
+             padding-bottom: 20px; border-bottom: 1px solid #eee;
          }
-
-        .copy-action {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        #copy-link-button {
-            background-color: #f67280;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.2s ease;
-        }
-         #copy-link-button i {
-             margin-right: 5px;
+         .profile-info img {
+             width: 60px; height: 60px; border-radius: 50%; margin-right: 15px;
+             object-fit: cover; background-color: #eee; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
          }
+         .profile-details p { margin: 2px 0; font-size: 0.95em; color: #444;}
+         .profile-details strong { color: #000; }
+        .edit-section { margin-top: 15px; }
+        .edit-section form { margin-bottom: 20px; }
+        .edit-section label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 0.9em; color: #555; }
+        .edit-section input[type="text"] { width: calc(100% - 95px); padding: 8px 10px; border-radius: 5px; border: 1px solid #ccc; margin-right: 5px; font-size: 0.95em; }
+        .edit-section input[type="file"] { font-size: 0.9em; margin-bottom: 8px; display: block; }
+        .edit-section button { padding: 9px 15px; font-size: 0.9em; background-color: #f67280; color: white; border: none; border-radius: 20px; cursor: pointer; transition: background-color 0.2s ease; }
+        .edit-section button:hover { background-color: #c06c84;}
+        .edit-section button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .edit-section button i { margin-right: 5px; }
+        .update-status { margin-top: 8px; font-size: 0.9em; min-height: 1.1em; }
+        .update-status:empty { display: none; }
+        .update-status.success { color: green; }
+        .update-status.error { color: red; }
+        .update-status.info { color: orange; }
 
-        #copy-link-button:hover {
-            background-color: #c06c84;
-        }
-
-        #copy-status {
-            display: inline-block;
-            margin-left: 10px;
-            font-size: 0.9em;
-            font-weight: bold;
-        }
+        .ngl-link-section { margin-top: 25px; }
+        .ngl-link-section p { text-align: center; margin-bottom: 5px; color: #555; font-size: 0.95em;}
+        #ngl-link { font-weight: bold; word-break: break-all; color: #c06c84; text-decoration: none; }
+        #ngl-link:hover { text-decoration: underline; }
+        .copy-action { text-align: center; margin-bottom: 25px; }
+        #copy-link-button { background-color: #f67280; color: white; padding: 8px 15px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: background-color 0.2s ease; }
+        #copy-link-button i { margin-right: 5px; }
+        #copy-link-button:hover { background-color: #c06c84; }
+        #copy-status { display: inline-block; margin-left: 10px; font-size: 0.9em; font-weight: bold; }
         #copy-status:empty { display: none; }
-        #copy-status.success { color: #28a745; }
-        #copy-status.error { color: #dc3545; }
+        #copy-status.success { color: green; } #copy-status.error { color: red; }
 
-
-        .message-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 25px;
-        }
-         .message-list li#loading-placeholder,
-         .message-list li#no-messages-placeholder {
-            text-align: center;
-            color: #777;
-            padding: 20px;
-            font-style: italic;
-         }
-
-        .message-item {
-            background: #fff;
-            border: 1px solid #eee;
-            padding: 15px 20px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            border-left: 5px solid #f8b195;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .message-item p {
-            margin: 0 0 8px 0;
-            word-wrap: break-word;
-            font-size: 1.05em;
-            color: #444;
-        }
-
-        .message-time {
-            font-size: 0.8em;
-            color: #888;
-            display: block;
-        }
-
-        #logout-button {
-            background-color: #6c757d;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.95em;
-            transition: background-color 0.2s ease;
-            display: block;
-            margin: 30px auto 0 auto;
-            min-width: 120px;
-            text-align: center;
-        }
-        #logout-button i {
-            margin-right: 6px;
-        }
-
-        #logout-button:hover {
-            background-color: #5a6268;
-        }
-
-         @media (max-width: 600px) {
-             .container { padding: 20px; }
-             h1 { font-size: 1.6em;}
-         }
-
+        .message-list { list-style: none; padding: 0; margin-top: 25px; }
+         .message-list li#loading-placeholder, .message-list li#no-messages-placeholder { text-align: center; color: #777; padding: 20px; font-style: italic; }
+        .message-item { background: #fff; border: 1px solid #eee; padding: 15px 20px; margin-bottom: 15px; border-radius: 10px; border-left: 5px solid #f8b195; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .message-item p { margin: 0 0 8px 0; word-wrap: break-word; font-size: 1.05em; color: #444; }
+        .message-time { font-size: 0.8em; color: #888; display: block; }
+        #logout-button { background-color: #6c757d; color: white; padding: 10px 18px; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95em; transition: background-color 0.2s ease; display: block; margin: 30px auto 0 auto; min-width: 120px; text-align: center; }
+        #logout-button i { margin-right: 6px; }
+        #logout-button:hover { background-color: #5a6268; }
+         @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.6em;} .edit-section input[type="text"] { width: calc(100% - 85px); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Pesan Anonim Saya</h1>
+        <h1>Inbox Saya</h1>
+
+        <div class="profile-info">
+            <img src="https://via.placeholder.com/60" alt="Avatar" id="user-avatar-inbox">
+            <div class="profile-details">
+                <p>Username: <strong id="username-display-inbox">Memuat...</strong></p>
+                <p>Prompt Saat Ini: <strong id="current-prompt-display">Memuat...</strong></p>
+            </div>
+        </div>
+
+        <div class="edit-section">
+             <form id="prompt-form">
+                 <label for="new-prompt">Ubah Prompt Anda:</label>
+                 <div>
+                     <input type="text" id="new-prompt" name="prompt" placeholder="Tulis prompt baru..." required maxlength="100">
+                     <button type="submit"><i class="fas fa-save"></i> Simpan</button>
+                 </div>
+                 <p id="prompt-update-status" class="update-status"></p>
+             </form>
+
+             <form id="avatar-form">
+                 <label for="avatar-file">Ubah Foto Profil:</label>
+                 <div>
+                    <input type="file" id="avatar-file" name="avatar" accept="wanz.mp4" required>
+                    <button type="submit"><i class="fas fa-upload"></i> Upload</button>
+                 </div>
+                  <p id="avatar-update-status" class="update-status"></p>
+             </form>
+         </div>
 
         <div class="ngl-link-section">
              <p>Bagikan Link NGL Anda:</p>
              <p><a href="#" id="ngl-link" target="_blank">Memuat link...</a></p>
         </div>
-
         <div class="copy-action">
              <button id="copy-link-button"><i class="fas fa-copy"></i> Salin Link</button>
              <span id="copy-status"></span>
         </div>
 
-
         <ul id="message-list" class="message-list">
              <li id="loading-placeholder">Memuat pesan...</li>
         </ul>
-
         <button id="logout-button"><i class="fas fa-right-from-bracket"></i> Logout</button>
     </div>
 
@@ -178,146 +119,103 @@
         const copyStatus = document.getElementById('copy-status');
         const logoutButton = document.getElementById('logout-button');
         const loadingPlaceholder = document.getElementById('loading-placeholder');
+        const userAvatarInbox = document.getElementById('user-avatar-inbox');
+        const usernameDisplayInbox = document.getElementById('username-display-inbox');
+        const currentPromptDisplay = document.getElementById('current-prompt-display');
+        const promptForm = document.getElementById('prompt-form');
+        const newPromptInput = document.getElementById('new-prompt');
+        const promptUpdateStatus = document.getElementById('prompt-update-status');
+        const avatarForm = document.getElementById('avatar-form');
+        const avatarFile = document.getElementById('avatar-file');
+        const avatarUpdateStatus = document.getElementById('avatar-update-status');
 
         function renderMessage(msg) {
             const item = document.createElement('li');
-            item.className = 'message-item';
-            item.dataset.id = msg._id;
-
-            const content = document.createElement('p');
-            content.textContent = msg.content;
-
-            const time = document.createElement('span');
-            time.className = 'message-time';
+            item.className = 'message-item'; item.dataset.id = msg._id;
+            const content = document.createElement('p'); content.textContent = msg.content;
+            const time = document.createElement('span'); time.className = 'message-time';
             time.textContent = new Date(msg.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-
-            item.appendChild(content);
-            item.appendChild(time);
-            return item;
+            item.appendChild(content); item.appendChild(time); return item;
         }
-
-        function displayNoMessages() {
-             messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link Anda!</li>';
-        }
+        function displayNoMessages() { messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link Anda!</li>'; }
 
         async function fetchMessages() {
             try {
                 const response = await fetch('/api/my-messages');
-                if (!response.ok) {
-                     if(response.status === 401) {
-                         window.location.href = '/';
-                         return;
-                     }
-                    throw new Error('Gagal memuat pesan');
-                }
+                if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error(''); }
                 const messages = await response.json();
-
-                if (loadingPlaceholder) loadingPlaceholder.remove();
-                messageList.innerHTML = '';
-
-                if (messages.length === 0) {
-                     displayNoMessages();
-                } else {
-                    messages.forEach(msg => {
-                        messageList.appendChild(renderMessage(msg));
-                    });
-                }
-            } catch (error) {
-                 if (loadingPlaceholder) loadingPlaceholder.remove();
-                 messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan. Coba lagi nanti.</li>';
-            }
+                if (loadingPlaceholder) loadingPlaceholder.remove(); messageList.innerHTML = '';
+                if (messages.length === 0) { displayNoMessages(); } else { messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); }); }
+            } catch (error) { if (loadingPlaceholder) loadingPlaceholder.remove(); messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan.</li>'; }
         }
 
         async function fetchUserInfo() {
              try {
                  const response = await fetch('/api/me');
-                 if (!response.ok) {
-                     if(response.status === 401) {
-                         window.location.href = '/';
-                         return;
-                     }
-                     throw new Error('Gagal memuat info user');
-                 }
+                 if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error(''); }
                  const userData = await response.json();
-                 const currentUser = userData.username;
-                 const fullLink = `${window.location.origin}/ngl/${currentUser}`;
-                 nglLinkEl.textContent = fullLink;
-                 nglLinkEl.href = fullLink;
-
-             } catch (error) {
-                 nglLinkEl.textContent = 'Gagal memuat link';
-                 nglLinkEl.href = '#';
-             }
+                 usernameDisplayInbox.textContent = userData.username;
+                 currentPromptDisplay.textContent = userData.prompt;
+                 userAvatarInbox.src = userData.profilePictureUrl || "https://via.placeholder.com/60";
+                 newPromptInput.value = userData.prompt;
+                 const fullLink = `${window.location.origin}/ngl/${userData.username}`;
+                 nglLinkEl.textContent = fullLink; nglLinkEl.href = fullLink;
+             } catch (error) { usernameDisplayInbox.textContent = 'Error'; currentPromptDisplay.textContent = 'Error'; nglLinkEl.textContent = 'Gagal memuat link'; }
         }
 
          copyButton.addEventListener('click', () => {
              const linkToCopy = nglLinkEl.href;
              if (linkToCopy && linkToCopy !== '#') {
-                 navigator.clipboard.writeText(linkToCopy).then(() => {
-                     copyStatus.textContent = 'Link disalin!';
-                     copyStatus.className = 'success';
-                     setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500);
-                 }).catch(err => {
-                     copyStatus.textContent = 'Gagal menyalin';
-                     copyStatus.className = 'error';
-                     setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000);
-                 });
-             } else {
-                 copyStatus.textContent = 'Link belum siap';
-                 copyStatus.className = 'error';
-                 setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000);
-             }
+                 navigator.clipboard.writeText(linkToCopy).then(() => { copyStatus.textContent = 'Link disalin!'; copyStatus.className = 'success'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500);
+                 }).catch(err => { copyStatus.textContent = 'Gagal menyalin'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); });
+             } else { copyStatus.textContent = 'Link belum siap'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); }
          });
 
          logoutButton.addEventListener('click', async () => {
-            logoutButton.disabled = true;
-            logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...';
-             try {
-                 const response = await fetch('/api/logout', { method: 'POST' });
-                 if (response.ok) {
-                     window.location.href = '/';
-                 } else {
-                     alert('Logout gagal. Coba lagi.');
-                     logoutButton.disabled = false;
-                     logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout';
-                 }
-             } catch (error) {
-                 alert('Terjadi kesalahan saat logout.');
-                 logoutButton.disabled = false;
-                 logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout';
-             }
+            logoutButton.disabled = true; logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...';
+             try { const response = await fetch('/api/logout', { method: 'POST' }); if (response.ok) { window.location.href = '/'; } else { alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; }
+             } catch (error) { alert('Terjadi kesalahan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; }
          });
 
+        promptForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); const newPrompt = newPromptInput.value.trim();
+            if (!newPrompt) { promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error'; return; }
+            const submitButton = promptForm.querySelector('button'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            promptUpdateStatus.textContent = 'Menyimpan...'; promptUpdateStatus.className = 'update-status info';
+            try {
+                const response = await fetch('/api/me/prompt', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt }) });
+                const result = await response.json();
+                if (response.ok) { promptUpdateStatus.textContent = result.message || 'Prompt diperbarui!'; promptUpdateStatus.className = 'update-status success'; currentPromptDisplay.textContent = result.newPrompt; }
+                else { promptUpdateStatus.textContent = result.message || 'Gagal memperbarui.'; promptUpdateStatus.className = 'update-status error'; }
+            } catch(error) { promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error'; }
+            finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan'; setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000); }
+        });
+
+         avatarForm.addEventListener('submit', async (e) => {
+             e.preventDefault(); const file = avatarFile.files[0];
+             if (!file) { avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error'; return; }
+             const submitButton = avatarForm.querySelector('button'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+             avatarUpdateStatus.textContent = 'Mengupload...'; avatarUpdateStatus.className = 'update-status info';
+             const formData = new FormData(); formData.append('avatar', file);
+             try {
+                 const response = await fetch('/api/me/avatar', { method: 'POST', body: formData });
+                 const result = await response.json();
+                 if (response.ok) {
+                     avatarUpdateStatus.textContent = 'Avatar diperbarui!'; avatarUpdateStatus.className = 'update-status success';
+                     userAvatarInbox.src = result.newAvatarUrl; avatarFile.value = null; // Reset input
+                 } else { avatarUpdateStatus.textContent = result.message || 'Gagal upload.'; avatarUpdateStatus.className = 'update-status error'; }
+             } catch(error) { avatarUpdateStatus.textContent = 'Error upload.'; avatarUpdateStatus.className = 'update-status error'; }
+             finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-upload"></i> Upload'; setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000); }
+         });
 
         const socket = io();
-
-        socket.on('connect', () => {
-            console.log('Terhubung ke WebSocket server');
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Terputus dari WebSocket server');
-        });
-
-        socket.on('connect_error', (err) => {
-            console.error('Kesalahan koneksi WebSocket:', err.message);
-             if (err.message === 'Authentication required') {
-                setTimeout(() => { window.location.href = '/'; }, 2000);
-             }
-        });
-
-        socket.on('new_message', (newMessage) => {
-            const messageItem = renderMessage(newMessage);
-            const noMessagesLi = document.getElementById('no-messages-placeholder');
-             if (noMessagesLi) {
-                 messageList.innerHTML = '';
-             }
-            messageList.insertBefore(messageItem, messageList.firstChild);
-        });
+        socket.on('connect', () => {});
+        socket.on('disconnect', () => {});
+        socket.on('connect_error', (err) => { if (err.message === 'Authentication required') { setTimeout(() => { window.location.href = '/'; }, 2000); } });
+        socket.on('new_message', (newMessage) => { const messageItem = renderMessage(newMessage); const noMessagesLi = document.getElementById('no-messages-placeholder'); if (noMessagesLi) { messageList.innerHTML = ''; } messageList.insertBefore(messageItem, messageList.firstChild); });
 
         fetchUserInfo();
         fetchMessages();
-
     </script>
 </body>
 </html>
