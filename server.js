@@ -9,8 +9,8 @@ const socketIo = require('socket.io');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
-const User = require('./models/User');
-const Message = require('./models/Message');
+const User = require('./models/user');
+const Message = require('./models/message');
 
 const app = express();
 const server = http.createServer(app);
