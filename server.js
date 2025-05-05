@@ -1,4 +1,4 @@
-// File: server.js (Bersih tanpa komentar, modifikasi untuk Netlify)
+// File: server.js (Bersih tanpa komentar, modifikasi untuk SSR Meta Tags)
 
 require('dotenv').config();
 const express = require('express');
@@ -8,9 +8,10 @@ const path = require('path');
 const socketIo = require('socket.io');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const fs = require('fs'); // Import modul File System
 
-const User = require('./models/user');
-const Message = require('./models/message');
+const User = require('./models/user'); // Pastikan casing sesuai nama file
+const Message = require('./models/message'); // Pastikan casing sesuai nama file
 
 const app = express();
 const server = http.createServer(app);
@@ -116,14 +117,59 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
+// --- MODIFIKASI RUTE INI ---
 app.get('/ngl/:username', async (req, res) => {
     const username = req.params.username.toLowerCase();
+    const profileHtmlPath = path.resolve(__dirname, 'public', 'profile.html');
+
     try {
         const userExists = await User.exists({ username: username });
         if (!userExists) {
             return res.status(404).send('Pengguna tidak ditemukan');
         }
-        res.sendFile(path.resolve(__dirname, 'public', 'profile.html'));
+
+        // Baca isi file profile.html
+        fs.readFile(profileHtmlPath, 'utf8', (err, htmlData) => {
+            if (err) {
+                console.error("Error reading profile.html:", err);
+                return res.status(500).send('Terjadi kesalahan server saat membaca file.');
+            }
+
+            // Ganti placeholder atau tag yang ada dengan data dinamis
+            const pageTitle = `Kirimkan pesan anonim ke ${username}`;
+            const pageDescription = `Tulis pesan anonim untuk ${username} di NGL Clone!`;
+            // Anda bisa menambahkan gambar default jika mau
+            // const ogImageUrl = `${req.protocol}://${req.get('host')}/default-og-image.png`;
+
+            let modifiedHtml = htmlData;
+
+            // Ganti title
+            modifiedHtml = modifiedHtml.replace(
+                /<title>.*?<\/title>/, // Cari tag title yang ada
+                `<title>${pageTitle}</title>` // Ganti dengan title baru
+            );
+
+            // Sisipkan tag Open Graph (ganti atau tambahkan di <head>)
+            // Cara aman: tambahkan placeholder di profile.html atau sisipkan sebelum </head>
+            const metaTags = `
+                <meta property="og:title" content="${pageTitle}" />
+                <meta property="og:description" content="${pageDescription}" />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="${req.protocol}://${req.get('host')}${req.originalUrl}" />
+                <!-- <meta property="og:image" content="${ogImageUrl}" /> -->
+                <!-- Tambahkan tag Twitter Card jika mau -->
+                <meta name="twitter:card" content="summary" />
+                <meta name="twitter:title" content="${pageTitle}" />
+                <meta name="twitter:description" content="${pageDescription}" />
+                <!-- <meta name="twitter:image" content="${ogImageUrl}" /> -->
+            `;
+            modifiedHtml = modifiedHtml.replace('</head>', `${metaTags}</head>`);
+
+            // Kirim HTML yang sudah dimodifikasi
+            res.setHeader('Content-Type', 'text/html');
+            res.send(modifiedHtml);
+        });
+
     } catch (error) {
         console.error("Error finding user profile:", error);
         res.status(500).send('Terjadi kesalahan server.');

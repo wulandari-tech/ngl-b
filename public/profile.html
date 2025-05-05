@@ -157,9 +157,8 @@
         const pathParts = window.location.pathname.split('/');
         const recipientUsername = pathParts[pathParts.length - 1] || 'pengguna';
 
-        // --- BARIS INI MENGUBAH JUDUL ---
+        // Setel ulang judul di sisi klien (meskipun server mungkin sudah mengaturnya)
         document.title = `Kirimkan pesan anonim ke ${recipientUsername}`;
-        // ---------------------------------
 
         document.getElementById('profile-username-display').textContent = recipientUsername;
 
@@ -208,6 +207,7 @@
             } finally {
                  sendButton.disabled = false;
                  sendButton.innerHTML = originalButtonHTML;
+                 // Hapus pesan status (kecuali sukses) setelah beberapa detik
                  setTimeout(() => {
                     if (!sendStatus.classList.contains('success')) {
                        sendStatus.textContent = '';
