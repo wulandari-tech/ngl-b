@@ -518,7 +518,7 @@
                 ctx.font = 'normal 24px sans-serif'; ctx.fillStyle = '#ffffff'; const replyMaxHeight = canvasHeight - currentY - padding - 40;
                 currentY = drawTextWithWrapping(ctx, replyMsg, padding, currentY, textMaxWidth, 32, replyMaxHeight);
                 ctx.font = '14px sans-serif'; ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; ctx.textAlign = 'center';
-                ctx.fillText(`ngl.clone.app/${username}`, canvasWidth / 2, canvasHeight - padding + 5); // Sesuaikan domain
+                ctx.fillText(`ngl-wanz.up.railway.app/ngl/${username}`, canvasWidth / 2, canvasHeight - padding + 5); // Sesuaikan domain
                 ctx.textAlign = 'left';
 
                 const dataUrl = canvas.toDataURL('image/png'); const link = document.createElement('a');
