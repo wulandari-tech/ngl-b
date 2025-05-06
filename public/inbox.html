@@ -54,18 +54,96 @@
         #copy-status:empty { display: none; }
         #copy-status.success { color: green; } #copy-status.error { color: red; }
 
-        .message-list { list-style: none; padding: 0; margin-top: 25px; }
-         .message-list li#loading-placeholder, .message-list li#no-messages-placeholder { text-align: center; color: #777; padding: 20px; font-style: italic; }
-        .message-item { background: #fff; border: 1px solid #eee; padding: 15px 20px; margin-bottom: 15px; border-radius: 10px; border-left: 5px solid #f8b195; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        #inbox-content-area {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .message-list { list-style: none; padding: 0; margin: 0; }
+        .message-list li#loading-placeholder, .message-list li#no-messages-placeholder { text-align: center; color: #777; padding: 20px; font-style: italic; }
+        .message-item { background: #fff; border: 1px solid #eee; padding: 15px 20px; margin-bottom: 15px; border-radius: 10px; border-left: 5px solid #f8b195; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: background-color 0.2s ease; }
         .message-item p { margin: 0 0 8px 0; word-wrap: break-word; font-size: 1.05em; color: #444; }
         .message-time { font-size: 0.8em; color: #888; display: block; }
+        .share-reply-button { background-color: #6c757d; color: white; padding: 4px 10px; border: none; border-radius: 15px; cursor: pointer; font-size: 0.8em; transition: background-color 0.2s ease; margin-left: 10px; vertical-align: middle; }
+        .share-reply-button:hover { background-color: #5a6268; }
+        .share-reply-button i { margin-right: 4px; }
+        .message-item.clickable-message { cursor: pointer; }
+        .message-item.clickable-message:hover { background-color: #fef8f5; }
+        .message-item.unread { font-weight: 600; border-left-color: #f67280; }
+
         #logout-button { background-color: #6c757d; color: white; padding: 10px 18px; border: none; border-radius: 25px; cursor: pointer; font-size: 0.95em; transition: background-color 0.2s ease; display: block; margin: 30px auto 0 auto; min-width: 120px; text-align: center; }
         #logout-button i { margin-right: 6px; }
         #logout-button:hover { background-color: #5a6268; }
-         @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.6em;} .edit-section input[type="text"] { width: calc(100% - 85px); } }
+
+        #inbox-indicator {
+            position: fixed; top: 20px; right: 20px; background-color: rgba(0, 0, 0, 0.7);
+            color: white; width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.3em;
+            text-decoration: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000; transition: transform 0.2s ease, background-color 0.2s ease;
+            cursor: pointer; /* Make it clear it's clickable */
+        }
+        #inbox-indicator:hover { transform: scale(1.1); }
+        #inbox-indicator.active { /* Style when inbox is open */
+             background-color: rgba(246, 114, 128, 0.8); /* Example active color */
+        }
+        #unread-badge {
+            position: absolute; top: -5px; right: -5px; background-color: #f67280;
+            color: white; font-size: 0.7em; font-weight: bold; border-radius: 50%;
+            width: 20px; height: 20px; line-height: 20px; text-align: center; display: none;
+        }
+        #inbox-indicator.has-unread #unread-badge { display: block; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center; z-index: 1001;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-content {
+            background-color: white; padding: 25px 30px; border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2); width: 90%; max-width: 500px;
+            position: relative; transform: scale(0.9); transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content { transform: scale(1); }
+        .close-button {
+            position: absolute; top: 10px; right: 15px; background: none; border: none;
+            font-size: 1.8em; color: #aaa; cursor: pointer; padding: 0; line-height: 1;
+        }
+        .close-button:hover { color: #777; }
+        .modal-content h3 { margin-top: 0; margin-bottom: 20px; text-align: center; color: #333; }
+        .original-message-display { background-color: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .original-message-display p { margin: 5px 0; font-size: 0.95em; word-wrap: break-word; }
+        .original-message-display strong { color: #555; }
+        .reply-input-area label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #444;}
+        .reply-input-area textarea { width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-size: 1em; min-height: 60px; resize: vertical; margin-bottom: 20px;}
+        .modal-actions { text-align: right; display: flex; justify-content: flex-end; align-items: center; }
+        #modal-username-display { font-size: 0.85em; color: #555; margin-right: auto; }
+        #download-reply-button { background-color: #f67280; color: white; padding: 10px 15px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.95em; transition: background-color 0.2s ease; }
+        #download-reply-button:hover { background-color: #c06c84; }
+        #download-reply-button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #download-reply-button i { margin-right: 6px; }
+        #download-status { margin-left: 10px; font-size: 0.9em; font-weight: 500; }
+        #download-status:empty { display: none; }
+        #download-status.success { color: green; }
+        #download-status.error { color: red; }
+        #download-status.info { color: orange; }
+
+         @media (max-width: 600px) {
+             .container { padding: 20px; } h1 { font-size: 1.6em;}
+             .edit-section input[type="text"] { width: calc(100% - 85px); }
+             #inbox-indicator { width: 40px; height: 40px; font-size: 1.1em; bottom: 15px; right: 15px; top: auto; }
+             #unread-badge { width: 18px; height: 18px; line-height: 18px; font-size: 0.65em; }
+             .modal-content { padding: 20px; }
+         }
     </style>
 </head>
 <body>
+    <div id="inbox-indicator" style="display: none;">
+        <i class="fas fa-envelope"></i>
+        <span id="unread-badge"></span>
+    </div>
+
     <div class="container">
         <h1>Inbox Saya</h1>
 
@@ -90,7 +168,7 @@
              <form id="avatar-form">
                  <label for="avatar-file">Ubah Foto Profil:</label>
                  <div>
-                    <input type="file" id="avatar-file" name="avatar" accept="wanz.mp4" required>
+                    <input type="file" id="avatar-file" name="avatar" accept="image/*" required>
                     <button type="submit"><i class="fas fa-upload"></i> Upload</button>
                  </div>
                   <p id="avatar-update-status" class="update-status"></p>
@@ -106,11 +184,33 @@
              <span id="copy-status"></span>
         </div>
 
-        <ul id="message-list" class="message-list">
-             <li id="loading-placeholder">Memuat pesan...</li>
-        </ul>
-        <button id="logout-button"><i class="fas fa-right-from-bracket"></i> Logout</button>
+        <div id="inbox-content-area" style="display: none;">
+             <ul id="message-list" class="message-list">
+                 <li id="loading-placeholder">Memuat pesan...</li>
+             </ul>
+             <button id="logout-button"><i class="fas fa-right-from-bracket"></i> Logout</button>
+        </div>
     </div>
+
+     <div id="share-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button id="close-modal-button" class="close-button">×</button>
+                <h3>Bagikan Balasan Anda</h3>
+                <div class="original-message-display">
+                    <p><strong>Pesan Anonim:</strong></p>
+                    <p id="modal-original-message"></p>
+                </div>
+                <div class="reply-input-area">
+                    <label for="modal-reply-text">Balasan Anda:</label>
+                    <textarea id="modal-reply-text" rows="3" placeholder="Tulis balasan Anda di sini..."></textarea>
+                </div>
+                <div class="modal-actions">
+                     <span id="modal-username-display" ></span>
+                     <span id="download-status"></span>
+                     <button id="download-reply-button"><i class="fas fa-download"></i> Unduh Gambar</button>
+                </div>
+            </div>
+     </div>
 
     <script>
         const messageList = document.getElementById('message-list');
@@ -128,94 +228,391 @@
         const avatarForm = document.getElementById('avatar-form');
         const avatarFile = document.getElementById('avatar-file');
         const avatarUpdateStatus = document.getElementById('avatar-update-status');
+        const inboxIndicator = document.getElementById('inbox-indicator');
+        const unreadBadge = document.getElementById('unread-badge');
+        const inboxContentArea = document.getElementById('inbox-content-area');
+        const modalOverlay = document.getElementById('share-modal');
+        const modalContent = modalOverlay.querySelector('.modal-content');
+        const closeModalButton = document.getElementById('close-modal-button');
+        const modalOriginalMessage = document.getElementById('modal-original-message');
+        const modalReplyText = document.getElementById('modal-reply-text');
+        const downloadButton = document.getElementById('download-reply-button');
+        const downloadStatus = document.getElementById('download-status');
+        const modalUsernameDisplay = document.getElementById('modal-username-display');
+
+        let currentMessageContent = '';
+        let loggedInUsername = '';
+        let currentMessageId = null;
 
         function renderMessage(msg) {
             const item = document.createElement('li');
-            item.className = 'message-item'; item.dataset.id = msg._id;
-            const content = document.createElement('p'); content.textContent = msg.content;
-            const time = document.createElement('span'); time.className = 'message-time';
+            item.className = 'message-item clickable-message';
+            item.dataset.id = msg._id;
+            item.dataset.content = msg.content;
+            if (msg.isRead === false) {
+                item.classList.add('unread');
+            }
+
+            const content = document.createElement('p');
+            content.textContent = msg.content;
+
+            const time = document.createElement('span');
+            time.className = 'message-time';
             time.textContent = new Date(msg.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-            item.appendChild(content); item.appendChild(time); return item;
+
+            const shareButton = document.createElement('button');
+            shareButton.innerHTML = '<i class="fas fa-share-square"></i> Balas';
+            shareButton.className = 'share-reply-button';
+
+            item.appendChild(content);
+            item.appendChild(time);
+            item.appendChild(shareButton);
+            return item;
         }
-        function displayNoMessages() { messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link Anda!</li>'; }
+
+        function displayNoMessages() {
+            messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link Anda!</li>';
+        }
 
         async function fetchMessages() {
             try {
                 const response = await fetch('/api/my-messages');
-                if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error(''); }
+                if (!response.ok) {
+                    if (response.status === 401) { window.location.href = '/'; return; }
+                    throw new Error('Gagal memuat pesan');
+                }
                 const messages = await response.json();
-                if (loadingPlaceholder) loadingPlaceholder.remove(); messageList.innerHTML = '';
-                if (messages.length === 0) { displayNoMessages(); } else { messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); }); }
-            } catch (error) { if (loadingPlaceholder) loadingPlaceholder.remove(); messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan.</li>'; }
+                const loadingLi = messageList.querySelector('#loading-placeholder');
+                if(loadingLi) loadingLi.remove();
+                messageList.innerHTML = ''; // Clear previous before potentially showing no messages
+                if (messages.length === 0) {
+                    displayNoMessages();
+                } else {
+                    messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); });
+                }
+            } catch (error) {
+                console.error(error);
+                const loadingLi = messageList.querySelector('#loading-placeholder');
+                if(loadingLi) loadingLi.remove();
+                messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan.</li>';
+            }
         }
 
         async function fetchUserInfo() {
              try {
                  const response = await fetch('/api/me');
-                 if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error(''); }
+                 if (!response.ok) {
+                     if(response.status === 401) { window.location.href = '/'; return; }
+                     throw new Error('Gagal mengambil info user');
+                 }
                  const userData = await response.json();
+                 loggedInUsername = userData.username;
                  usernameDisplayInbox.textContent = userData.username;
-                 currentPromptDisplay.textContent = userData.prompt;
+                 currentPromptDisplay.textContent = userData.prompt || '-';
                  userAvatarInbox.src = userData.profilePictureUrl || "https://via.placeholder.com/60";
-                 newPromptInput.value = userData.prompt;
+                 newPromptInput.value = userData.prompt || '';
                  const fullLink = `${window.location.origin}/ngl/${userData.username}`;
-                 nglLinkEl.textContent = fullLink; nglLinkEl.href = fullLink;
-             } catch (error) { usernameDisplayInbox.textContent = 'Error'; currentPromptDisplay.textContent = 'Error'; nglLinkEl.textContent = 'Gagal memuat link'; }
+                 nglLinkEl.textContent = fullLink;
+                 nglLinkEl.href = fullLink;
+                 updateUnreadIndicator(userData.unreadCount || 0);
+                 modalUsernameDisplay.textContent = `@${loggedInUsername}`;
+             } catch (error) {
+                 console.error(error);
+                 usernameDisplayInbox.textContent = 'Error';
+                 currentPromptDisplay.textContent = 'Error';
+                 nglLinkEl.textContent = 'Gagal memuat link';
+                 inboxIndicator.style.display = 'none';
+             }
         }
 
-         copyButton.addEventListener('click', () => {
+        function updateUnreadIndicator(count) {
+             if (count > 0) {
+                 unreadBadge.textContent = count > 99 ? '99+' : count;
+                 inboxIndicator.classList.add('has-unread');
+                 inboxIndicator.style.display = 'flex';
+             } else {
+                 inboxIndicator.classList.remove('has-unread');
+                 inboxIndicator.style.display = 'flex';
+             }
+        }
+
+        async function markMessageAsRead(messageId) {
+            const messageItem = messageList.querySelector(`.message-item[data-id="${messageId}"]`);
+            if (messageItem && messageItem.classList.contains('unread')) {
+                try {
+                     messageItem.classList.remove('unread');
+                     await fetch(`/api/messages/${messageId}/read`, { method: 'PUT' });
+                     const response = await fetch('/api/me');
+                     if (response.ok) {
+                        const data = await response.json();
+                        updateUnreadIndicator(data.unreadCount || 0);
+                     }
+                 } catch (error) {
+                    console.error("Gagal menandai pesan dibaca:", error);
+                    if (messageItem) messageItem.classList.add('unread');
+                 }
+            }
+        }
+
+        copyButton.addEventListener('click', () => {
              const linkToCopy = nglLinkEl.href;
              if (linkToCopy && linkToCopy !== '#') {
-                 navigator.clipboard.writeText(linkToCopy).then(() => { copyStatus.textContent = 'Link disalin!'; copyStatus.className = 'success'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500);
-                 }).catch(err => { copyStatus.textContent = 'Gagal menyalin'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); });
-             } else { copyStatus.textContent = 'Link belum siap'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); }
+                 navigator.clipboard.writeText(linkToCopy).then(() => {
+                     copyStatus.textContent = 'Link disalin!'; copyStatus.className = 'success';
+                     setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500);
+                 }).catch(err => {
+                     copyStatus.textContent = 'Gagal menyalin'; copyStatus.className = 'error';
+                     setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000);
+                 });
+             } else {
+                 copyStatus.textContent = 'Link belum siap'; copyStatus.className = 'error';
+                 setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000);
+             }
          });
 
-         logoutButton.addEventListener('click', async () => {
+        logoutButton.addEventListener('click', async () => {
             logoutButton.disabled = true; logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...';
-             try { const response = await fetch('/api/logout', { method: 'POST' }); if (response.ok) { window.location.href = '/'; } else { alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; }
-             } catch (error) { alert('Terjadi kesalahan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; }
+             try {
+                 const response = await fetch('/api/logout', { method: 'POST' });
+                 if (response.ok) {
+                     window.location.href = '/';
+                 } else {
+                     alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout';
+                 }
+             } catch (error) {
+                 alert('Terjadi kesalahan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout';
+             }
          });
 
         promptForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const newPrompt = newPromptInput.value.trim();
-            if (!newPrompt) { promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error'; return; }
-            const submitButton = promptForm.querySelector('button'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            e.preventDefault();
+            const newPrompt = newPromptInput.value.trim();
+            if (!newPrompt) {
+                 promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error';
+                 return;
+            }
+            const submitButton = promptForm.querySelector('button');
+            submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             promptUpdateStatus.textContent = 'Menyimpan...'; promptUpdateStatus.className = 'update-status info';
             try {
-                const response = await fetch('/api/me/prompt', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt }) });
+                const response = await fetch('/api/me/prompt', {
+                     method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt })
+                });
                 const result = await response.json();
-                if (response.ok) { promptUpdateStatus.textContent = result.message || 'Prompt diperbarui!'; promptUpdateStatus.className = 'update-status success'; currentPromptDisplay.textContent = result.newPrompt; }
-                else { promptUpdateStatus.textContent = result.message || 'Gagal memperbarui.'; promptUpdateStatus.className = 'update-status error'; }
-            } catch(error) { promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error'; }
-            finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan'; setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000); }
+                if (response.ok) {
+                     promptUpdateStatus.textContent = result.message || 'Prompt diperbarui!'; promptUpdateStatus.className = 'update-status success';
+                     currentPromptDisplay.textContent = result.newPrompt;
+                } else {
+                     promptUpdateStatus.textContent = result.message || 'Gagal memperbarui.'; promptUpdateStatus.className = 'update-status error';
+                }
+            } catch(error) {
+                 promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error';
+            } finally {
+                 submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-save"></i> Simpan';
+                 setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000);
+            }
         });
 
-         avatarForm.addEventListener('submit', async (e) => {
-             e.preventDefault(); const file = avatarFile.files[0];
-             if (!file) { avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error'; return; }
-             const submitButton = avatarForm.querySelector('button'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        avatarForm.addEventListener('submit', async (e) => {
+             e.preventDefault();
+             const file = avatarFile.files[0];
+             if (!file) {
+                 avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error';
+                 return;
+             }
+             const submitButton = avatarForm.querySelector('button');
+             submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
              avatarUpdateStatus.textContent = 'Mengupload...'; avatarUpdateStatus.className = 'update-status info';
-             const formData = new FormData(); formData.append('avatar', file);
+             const formData = new FormData();
+             formData.append('avatar', file);
              try {
                  const response = await fetch('/api/me/avatar', { method: 'POST', body: formData });
                  const result = await response.json();
                  if (response.ok) {
                      avatarUpdateStatus.textContent = 'Avatar diperbarui!'; avatarUpdateStatus.className = 'update-status success';
-                     userAvatarInbox.src = result.newAvatarUrl; avatarFile.value = null; // Reset input
-                 } else { avatarUpdateStatus.textContent = result.message || 'Gagal upload.'; avatarUpdateStatus.className = 'update-status error'; }
-             } catch(error) { avatarUpdateStatus.textContent = 'Error upload.'; avatarUpdateStatus.className = 'update-status error'; }
-             finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-upload"></i> Upload'; setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000); }
+                     userAvatarInbox.src = result.newAvatarUrl;
+                     avatarFile.value = null;
+                 } else {
+                     avatarUpdateStatus.textContent = result.message || 'Gagal upload.'; avatarUpdateStatus.className = 'update-status error';
+                 }
+             } catch(error) {
+                 avatarUpdateStatus.textContent = 'Error upload.'; avatarUpdateStatus.className = 'update-status error';
+             } finally {
+                 submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-upload"></i> Upload';
+                 setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000);
+             }
          });
 
-        const socket = io();
-        socket.on('connect', () => {});
-        socket.on('disconnect', () => {});
-        socket.on('connect_error', (err) => { if (err.message === 'Authentication required') { setTimeout(() => { window.location.href = '/'; }, 2000); } });
-        socket.on('new_message', (newMessage) => { const messageItem = renderMessage(newMessage); const noMessagesLi = document.getElementById('no-messages-placeholder'); if (noMessagesLi) { messageList.innerHTML = ''; } messageList.insertBefore(messageItem, messageList.firstChild); });
+        function drawTextWithWrapping(context, text, x, y, maxWidth, lineHeight, maxHeight) {
+            const words = text.split(' ');
+            let line = '';
+            let currentY = y;
+            context.textBaseline = 'top';
+            for (let n = 0; n < words.length; n++) {
+                const testLine = line + words[n] + ' ';
+                const metrics = context.measureText(testLine);
+                const testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    if (maxHeight && currentY + lineHeight * 2 > y + maxHeight) {
+                        let trimmedLine = line.trim();
+                        while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) {
+                           trimmedLine = trimmedLine.slice(0, -1);
+                        }
+                        context.fillText(trimmedLine + '...', x, currentY);
+                        return currentY + lineHeight;
+                    }
+                    context.fillText(line.trim(), x, currentY);
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            if (!maxHeight || (currentY + lineHeight <= y + maxHeight)) {
+                 context.fillText(line.trim(), x, currentY);
+                 currentY += lineHeight;
+            } else if (maxHeight && line.trim().length > 0) {
+                let trimmedLine = line.trim();
+                while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) {
+                    trimmedLine = trimmedLine.slice(0, -1);
+                }
+                context.fillText(trimmedLine + '...', x, currentY - lineHeight);
+            }
+            return currentY;
+        }
+
+        async function generateAndDownloadImage() {
+            const originalMsg = currentMessageContent;
+            const replyMsg = modalReplyText.value.trim();
+            const username = loggedInUsername || "Anda";
+
+            if (!replyMsg) {
+                 downloadStatus.textContent = 'Balasan tidak boleh kosong.';
+                 downloadStatus.className = 'error';
+                 setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 3000);
+                 return;
+            }
+
+            downloadStatus.textContent = 'Membuat gambar...';
+            downloadStatus.className = 'info';
+            downloadButton.disabled = true;
+
+            try {
+                const canvas = document.createElement('canvas');
+                const canvasWidth = 540; const canvasHeight = 960;
+                canvas.width = canvasWidth; canvas.height = canvasHeight;
+                const ctx = canvas.getContext('2d');
+                const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight);
+                gradient.addColorStop(0, '#f8b195'); gradient.addColorStop(0.5, '#f67280'); gradient.addColorStop(1, '#c06c84');
+                ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                const padding = 40; const textMaxWidth = canvasWidth - 2 * padding; let currentY = padding + 20;
+                ctx.font = 'italic 18px sans-serif'; ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillText('Anonim bilang:', padding, currentY); currentY += 30;
+                ctx.font = 'normal 24px sans-serif'; ctx.fillStyle = '#ffffff'; const anonMaxHeight = canvasHeight * 0.35;
+                currentY = drawTextWithWrapping(ctx, originalMsg, padding, currentY, textMaxWidth, 32, anonMaxHeight); currentY += 35;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
+                ctx.moveTo(padding, currentY); ctx.lineTo(canvasWidth - padding, currentY); ctx.stroke(); currentY += 35;
+                ctx.font = 'bold 18px sans-serif'; ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillText(`Balasan @${username}:`, padding, currentY); currentY += 30;
+                ctx.font = 'normal 24px sans-serif'; ctx.fillStyle = '#ffffff'; const replyMaxHeight = canvasHeight - currentY - padding - 40;
+                currentY = drawTextWithWrapping(ctx, replyMsg, padding, currentY, textMaxWidth, 32, replyMaxHeight);
+                ctx.font = '14px sans-serif'; ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; ctx.textAlign = 'center';
+                ctx.fillText(`ngl.clone.app/${username}`, canvasWidth / 2, canvasHeight - padding + 5); // Sesuaikan domain
+                ctx.textAlign = 'left';
+
+                const dataUrl = canvas.toDataURL('image/png'); const link = document.createElement('a');
+                link.href = dataUrl; link.download = `ngl_reply_${Date.now()}.png`;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+
+                downloadStatus.textContent = 'Gambar diunduh!'; downloadStatus.className = 'success';
+                modalReplyText.value = ''; setTimeout(() => { hideModal(); }, 1500);
+            } catch (error) {
+                console.error("Error generating image:", error);
+                downloadStatus.textContent = 'Gagal membuat gambar.'; downloadStatus.className = 'error';
+            } finally {
+                 downloadButton.disabled = false;
+                 setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 4000);
+            }
+        }
+
+        function showModal(originalMessage, messageId) {
+            currentMessageContent = originalMessage;
+            currentMessageId = messageId;
+            modalOriginalMessage.textContent = originalMessage;
+            modalReplyText.value = '';
+            downloadStatus.textContent = ''; downloadStatus.className = '';
+            modalOverlay.style.display = 'flex';
+            setTimeout(() => {
+                modalOverlay.classList.add('show');
+                modalReplyText.focus();
+            }, 10);
+            markMessageAsRead(messageId);
+        }
+
+        function hideModal() {
+            modalOverlay.classList.remove('show');
+            setTimeout(() => {
+                 modalOverlay.style.display = 'none';
+                 currentMessageId = null; currentMessageContent = '';
+            }, 300);
+        }
+
+        messageList.addEventListener('click', (e) => {
+            const targetButton = e.target.closest('.share-reply-button');
+            const targetItem = e.target.closest('.message-item.clickable-message');
+            let messageItemElement = null;
+            if (targetButton) { messageItemElement = targetButton.closest('.message-item'); }
+            else if (targetItem) { messageItemElement = targetItem; }
+            if (messageItemElement && messageItemElement.dataset.content && messageItemElement.dataset.id) {
+                showModal(messageItemElement.dataset.content, messageItemElement.dataset.id);
+            }
+        });
+
+        closeModalButton.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) { hideModal(); }
+        });
+        downloadButton.addEventListener('click', generateAndDownloadImage);
+
+        inboxIndicator.addEventListener('click', (e) => {
+            e.preventDefault(); // Mencegah link default jika ada href
+            const isHidden = inboxContentArea.style.display === 'none';
+            inboxContentArea.style.display = isHidden ? 'block' : 'none';
+            inboxIndicator.classList.toggle('active', isHidden);
+            // Optional: Scroll ke area inbox jika terbuka di layar kecil
+            if (isHidden && window.innerWidth < 700) {
+                inboxContentArea.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        const socket = io({ autoConnect: true });
+
+        socket.on('connect', () => { });
+        socket.on('disconnect', (reason) => { });
+        socket.on('connect_error', (err) => {
+            if (err.message === 'Authentication required' || err.message === 'Unauthorized') {
+                 setTimeout(() => { window.location.href = '/'; }, 2000);
+            }
+        });
+
+        socket.on('new_message', (newMessage) => {
+             const messageItem = renderMessage(newMessage);
+             const noMessagesLi = messageList.querySelector('#no-messages-placeholder');
+             const loadingLi = messageList.querySelector('#loading-placeholder');
+             if (noMessagesLi) { noMessagesLi.remove(); }
+             if (loadingLi) { loadingLi.remove(); }
+             messageList.insertBefore(messageItem, messageList.firstChild);
+             fetchUserInfo();
+        });
+
+        socket.on('update_unread_count', (data) => {
+            updateUnreadIndicator(data.unreadCount || 0);
+        });
 
         fetchUserInfo();
         fetchMessages();
+
     </script>
 </body>
 </html>

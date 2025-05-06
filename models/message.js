@@ -1,18 +1,32 @@
+// models/Message.js
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-    recipientUsername: { // Menyimpan username penerima
-        type: String,
+    // Field ini yang seharusnya ada dan wajib, menyimpan ObjectId dari User
+    recipient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Mereferensikan model 'User'
         required: true,
-        lowercase: true,
-        index: true // Penting untuk query inbox
+        index: true // Index untuk query lebih cepat
     },
     content: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        maxlength: 1000 // Batasi panjang pesan
     },
-    // Tidak ada 'sender' field untuk menjaga anonimitas
-}, { timestamps: true });
+    isRead: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+    // HAPUS field recipientUsername jika ada di sini
+    // recipientUsername: { type: String, required: true }, // <- BARIS SEPERTI INI HARUS DIHAPUS
+});
 
-module.exports = mongoose.model('Message', messageSchema);
+// Menerapkan pemeriksaan model sebelum kompilasi
+module.exports = mongoose.models.Message || mongoose.model('Message', messageSchema);

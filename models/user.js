@@ -1,48 +1,36 @@
-// models/user.js
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
-        trim: true,
-        index: true // Indeks untuk pencarian cepat
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    // TAMBAHKAN FIELD INI:
-    prompt: {
-        type: String,
-        trim: true,
-        default: "kirimi saya pesan gabut anda" // Nilai default
-    },
-    profilePictureUrl: {
-        type: String,
-        trim: true,
-        default: "https://via.placeholder.com/40" // URL gambar default/placeholder
-    }
-}, { timestamps: true }); // Tambahkan timestamps otomatis
+    username: { type: String, required: true, unique: true, trim: true, index: true },
+    password: { type: String, required: true },
+    prompt: { type: String, default: 'Kirimkan aku pesan anonim!', trim: true, maxlength: 100 },
+    profilePictureUrl: { type: String, default: null },
+    profilePicturePublicId: { type: String, default: null },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
+    createdAt: { type: Date, default: Date.now }
+});
 
-// Hash password sebelum menyimpan
 userSchema.pre('save', async function(next) {
-    if (!this.isModified('password')) return next();
+    if (!this.isModified('password')) {
+        return next();
+    }
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
         next();
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        next(err);
     }
 });
 
-// Metode untuk membandingkan password
-userSchema.methods.comparePassword = function(candidatePassword) {
-    return bcrypt.compare(candidatePassword, this.password);
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    try {
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (err) {
+        throw err;
+    }
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

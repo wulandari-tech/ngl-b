@@ -38,7 +38,7 @@
             resize: none; outline: none; margin-bottom: 15px; font-family: inherit;
         }
         textarea#message-content::placeholder { color: rgba(255, 0, 100, 0.4); font-weight: 500; font-size: 1.1em; }
-        .dice-icon { position: absolute; bottom: 10px; right: 15px; font-size: 1.5em; opacity: 0.6; }
+        .dice-icon { position: absolute; bottom: 10px; right: 15px; font-size: 1.5em; opacity: 0.6; cursor: pointer; }
         .anon-qa {
             display: flex; align-items: center; justify-content: center; font-size: 0.85em; color: #fff;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); margin-bottom: 15px;
@@ -93,7 +93,7 @@
             </div>
             <form id="send-message-form" style="margin: 0;">
                 <textarea id="message-content" rows="4" placeholder="kirim pesan anonim padaku..." required></textarea>
-                 <span class="dice-icon">🎲</span>
+                 <span class="dice-icon" id="dice-button">🎲</span>
             </form>
         </div>
 
@@ -127,7 +127,21 @@
         const messageContent = document.getElementById('message-content');
         const sendButton = document.getElementById('send-button');
         const sendStatus = document.getElementById('send-status');
+        const diceButton = document.getElementById('dice-button');
         const originalButtonHTML = sendButton.innerHTML;
+
+        const randomPrompts = [
+            "Apa rahasia terbesarmu?", "Ceritakan lelucon!", "Apa hal paling memalukan yang pernah terjadi padamu?",
+            "Jika kamu bisa punya kekuatan super, apa itu?", "Apa pendapat jujurmu tentangku?", "Berikan aku rekomendasi lagu.",
+            "Apa mimpi teranehmu baru-baru ini?", "Hal apa yang membuatmu bahagia hari ini?",
+            "Satu hal yang ingin kamu ubah dari dirimu?", "Deskripsikan dirimu dalam 3 kata.",
+        ];
+
+        diceButton.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * randomPrompts.length);
+            messageContent.value = randomPrompts[randomIndex];
+            messageContent.focus();
+        });
 
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
