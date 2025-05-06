@@ -6,18 +6,21 @@ const mongoose = require('mongoose');
 const path = require('path');
 const http = require('http');
 const { Server } = require("socket.io");
+const rateLimit = require('express-rate-limit'); // Hanya perlu import jika diterapkan di sini
 require('dotenv').config();
-require('./config/passport'); // Sesuaikan path jika perlu
+require('./config/passport');
 
-const api = require('./routes/api'); // Sesuaikan path jika perlu
+const api = require('./routes/api');
 const apiRouter = api.router;
 const { addUserSocket, removeUserSocket } = api;
-const User = require('./models/user'); // Sesuaikan path jika perlu
+const User = require('./models/user');
 const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
+app.set('trust proxy', 1); // Diperlukan jika di belakang proxy (Heroku, Nginx, dll) untuk rate limiting IP yang benar
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -29,8 +32,8 @@ const sessionMiddleware = session({
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // 1 hari
-        // secure: process.env.NODE_ENV === 'production', // Aktifkan di production
+        maxAge: 1000 * 60 * 60 * 24,
+        // secure: process.env.NODE_ENV === 'production',
     }
 });
 app.use(sessionMiddleware);
@@ -62,23 +65,20 @@ app.get('/inbox', (req, res) => {
 
 app.get('/ngl/:username', async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.params.username });
+        const user = await User.findOne({ username: req.params.username.toLowerCase() }); // Selalu lowercase saat mencari
         if (!user) {
             return res.status(404).type('text/plain').send('User tidak ditemukan');
         }
-
         const profileHtmlPath = path.join(__dirname, 'public', 'profile.html');
         fs.readFile(profileHtmlPath, 'utf8', (err, htmlContent) => {
             if (err) {
                 console.error("Error reading profile.html:", err);
                 return res.status(500).type('text/plain').send('Internal Server Error');
             }
-
             let finalHtml = htmlContent
                 .replace(/{{USERNAME}}/g, user.username)
                 .replace(/{{PROMPT_TEXT}}/g, user.prompt || 'Kirimkan aku pesan anonim!')
                 .replace(/{{AVATAR_URL}}/g, user.profilePictureUrl || 'https://via.placeholder.com/40');
-
             res.type('html').send(finalHtml);
         });
     } catch (error) {
