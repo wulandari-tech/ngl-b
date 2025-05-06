@@ -3,86 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kirim Pesan Anonim</title>
+    <title>Kirim Pesan Anonim - {{USERNAME}}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: #000; line-height: 1.5;
-            background: linear-gradient(160deg, #ff7e5f, #feb47b, #ff708f);
-            background-attachment: fixed; display: flex; flex-direction: column;
-            justify-content: space-between; align-items: center; min-height: 100vh;
-            padding: 20px 15px;
-        }
-        .main-content {
-            width: 100%; max-width: 480px; display: flex; flex-direction: column;
-            align-items: center; flex-grow: 1; justify-content: center;
-        }
-        .message-box {
-            background-color: #fff; border-radius: 24px; padding: 16px; width: 100%;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); margin-bottom: 20px; position: relative;
-        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #000; line-height: 1.5; background: linear-gradient(160deg, #ff7e5f, #feb47b, #ff708f); background-attachment: fixed; display: flex; flex-direction: column; justify-content: space-between; align-items: center; min-height: 100vh; padding: 20px 15px; }
+
+        .main-content { width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; flex-grow: 1; justify-content: center; }
+
+        .message-box { background-color: #fff; border-radius: 24px; padding: 16px; width: 100%; box-shadow: 0 6px 20px rgba(0, 0, 0, .1); margin-bottom: 20px; position: relative; }
+
         .user-header { display: flex; align-items: center; margin-bottom: 12px; }
-        .user-avatar {
-            width: 40px; height: 40px; border-radius: 50%; margin-right: 12px;
-            object-fit: cover; background-color: #eee;
-        }
-        .user-details { font-size: 0.95em; line-height: 1.3; }
+
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; background-color: #eee; }
+
+        .user-details { font-size: .95em; line-height: 1.3; }
+
         .username { font-weight: 600; color: #000; }
-        .user-prompt { color: #555; font-size: 0.9em; word-wrap: break-word; }
-        textarea#message-content {
-            width: 100%; min-height: 100px; border: none; border-radius: 16px; padding: 15px;
-            font-size: 1.1em; color: rgba(0, 0, 0, 0.7);
-            background: linear-gradient(rgba(255, 100, 150, 0.1), rgba(255, 150, 100, 0.05));
-            resize: none; outline: none; margin-bottom: 15px; font-family: inherit;
-        }
-        textarea#message-content::placeholder { color: rgba(255, 0, 100, 0.4); font-weight: 500; font-size: 1.1em; }
-        .dice-icon { position: absolute; bottom: 10px; right: 15px; font-size: 1.5em; opacity: 0.6; cursor: pointer; }
-        .anon-qa {
-            display: flex; align-items: center; justify-content: center; font-size: 0.85em; color: #fff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); margin-bottom: 15px;
-        }
-        .anon-qa i { margin-right: 6px; font-size: 0.8em; }
-        button#send-button {
-            background-color: #000; color: #fff; border: none; border-radius: 50px; padding: 14px 20px;
-            font-size: 1.1em; font-weight: 600; cursor: pointer; width: 100%; text-align: center;
-            margin-bottom: 15px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
+
+        .user-prompt { color: #555; font-size: .9em; word-wrap: break-word; }
+
+        textarea#message-content { width: 100%; min-height: 100px; border: none; border-radius: 16px; padding: 15px; font-size: 1.1em; color: rgba(0, 0, 0, .7); background: linear-gradient(rgba(255, 100, 150, .1), rgba(255, 150, 100, .05)); resize: none; outline: 0; margin-bottom: 15px; font-family: inherit; }
+
+        textarea#message-content::placeholder { color: rgba(255, 0, 100, .4); font-weight: 500; font-size: 1.1em; }
+
+        .dice-icon { position: absolute; bottom: 10px; right: 15px; font-size: 1.5em; opacity: .6; cursor: pointer; }
+
+        .anon-qa { display: flex; align-items: center; justify-content: center; font-size: .85em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .2); margin-bottom: 15px; }
+
+        .anon-qa i { margin-right: 6px; font-size: .8em; }
+
+        button#send-button { background-color: #000; color: #fff; border: none; border-radius: 50px; padding: 14px 20px; font-size: 1.1em; font-weight: 600; cursor: pointer; width: 100%; text-align: center; margin-bottom: 15px; transition: background-color .2s ease, transform .1s ease; }
+
         button#send-button:hover { background-color: #333; }
-        button#send-button:active { transform: scale(0.98); }
+
+        button#send-button:active { transform: scale(.98); }
+
         button#send-button:disabled { background-color: #888; cursor: not-allowed; transform: none; }
+
         button#send-button i.fa-spinner { margin-right: 8px; }
-        .message {
-             min-height: 1.1em; font-weight: 500; text-align: center; font-size: 0.95em; margin-bottom: 15px;
-             color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
+
+        .message { min-height: 1.1em; font-weight: 500; text-align: center; font-size: .95em; margin-bottom: 15px; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .2); }
+
         .message:empty { display: none; }
+
         .message.success { color: #e6ffed; }
+
         .message.error { color: #ffebee; }
+
         .message.info { color: #fff; }
 
-        .hit-counter {
-            font-size: 0.85em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px; display: flex; align-items: center; justify-content: center;
-        }
-        .hit-counter i { margin: 0 6px; font-size: 0.9em; }
-        .get-own-button {
-            display: block; background-color: #000; color: #fff; border: none; border-radius: 50px;
-            padding: 14px 20px; font-size: 1.05em; font-weight: 600; cursor: pointer; width: 100%;
-            text-align: center; text-decoration: none; margin-bottom: 30px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
+        .hit-counter { font-size: .85em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .2); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
+
+        .hit-counter i { margin: 0 6px; font-size: .9em; }
+
+        .get-own-button { display: block; background-color: #000; color: #fff; border: none; border-radius: 50px; padding: 14px 20px; font-size: 1.05em; font-weight: 600; cursor: pointer; width: 100%; text-align: center; text-decoration: none; margin-bottom: 30px; transition: background-color .2s ease, transform .1s ease; }
+
         .get-own-button:hover { background-color: #333; }
-        .get-own-button:active { transform: scale(0.98); }
+
+        .get-own-button:active { transform: scale(.98); }
+
         .page-footer { width: 100%; text-align: center; padding-bottom: 10px; }
-        .footer-links a { font-size: 0.8em; color: rgba(255, 255, 255, 0.7); text-decoration: none; margin: 0 8px; }
+
+        .footer-links a { font-size: .8em; color: rgba(255, 255, 255, .7); text-decoration: none; margin: 0 8px; }
+
         .footer-links a:hover { text-decoration: underline; }
+
+        .poll-display-section { width: 100%; margin-bottom: 25px; background: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, .1); }
+
+        .poll-display-section h3 { font-size: 1.1em; color: #333; margin-bottom: 12px; text-align: left; }
+
+        .poll-question { font-weight: bold; margin-bottom: 10px; font-size: 1.05em; color: #111; }
+
+        .poll-options button { display: block; width: 100%; background-color: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; padding: 10px 15px; text-align: left; margin-bottom: 8px; cursor: pointer; font-size: 1em; color: #333; transition: background-color 0.2s ease, border-color 0.2s ease; }
+
+        .poll-options button:hover:not(:disabled) { background-color: #e9e9e9; border-color: #ccc; }
+
+        .poll-options button:disabled { background-color: #d1ecf1; border-color: #bee5eb; cursor: default; color: #0c5460; opacity: 0.8; }
+
+        .poll-options button.voted-by-user { background-color: #d4edda; border-color: #c3e6cb; font-weight: bold; color: #155724; } /* Lebih jelas untuk yg dipilih user */
+
+        .poll-feedback { font-size: 0.9em; text-align: center; margin-top: 10px; font-weight: 500; min-height: 1.1em; }
+
+        .poll-feedback.success { color: #155724; }
+
+        .poll-feedback.error { color: #721c24; }
+
     </style>
 </head>
 <body class="profile-page-body">
+
     <div class="main-content">
+
         <div class="message-box">
             <div class="user-header">
                 <img src="{{AVATAR_URL}}" alt="Avatar" class="user-avatar" id="user-avatar-img">
@@ -93,7 +106,7 @@
             </div>
             <form id="send-message-form" style="margin: 0;">
                 <textarea id="message-content" rows="4" placeholder="kirim pesan anonim padaku..." required></textarea>
-                 <span class="dice-icon" id="dice-button">🎲</span>
+                <span class="dice-icon" id="dice-button">🎲</span>
             </form>
         </div>
 
@@ -105,8 +118,12 @@
 
         <button type="submit" form="send-message-form" id="send-button">Kirim!</button>
 
+        <div id="polls-container" style="width: 100%;">
+            <!-- Polling akan dimuat di sini oleh JavaScript -->
+        </div>
+
         <div class="hit-counter">
-           <i class="fas fa-hand-point-up"></i> 246 orang baru saja mengetuk tombol ini <i class="fas fa-hand-point-up fa-flip-horizontal"></i>
+            <i class="fas fa-hand-point-up"></i> 246 orang baru saja mengetuk tombol ini <i class="fas fa-hand-point-up fa-flip-horizontal"></i>
         </div>
 
         <a href="/" class="get-own-button">Dapatkan pesan untukmu sendiri!</a>
@@ -120,69 +137,174 @@
     </footer>
 
     <script>
-        const pathPartsJS = window.location.pathname.split('/');
-        const recipientUsernameJS = pathPartsJS[pathPartsJS.length - 1] || 'pengguna';
+        // Pastikan kode dieksekusi setelah DOM siap
+        document.addEventListener('DOMContentLoaded', () => {
 
-        const messageForm = document.getElementById('send-message-form');
-        const messageContent = document.getElementById('message-content');
-        const sendButton = document.getElementById('send-button');
-        const sendStatus = document.getElementById('send-status');
-        const diceButton = document.getElementById('dice-button');
-        const originalButtonHTML = sendButton.innerHTML;
+            const pathPartsJS = window.location.pathname.split('/');
+            const recipientUsernameJS = pathPartsJS[pathPartsJS.length - 1] || null; // Set null jika tidak ada
 
-        const randomPrompts = [
-            "Apa rahasia terbesarmu?", "Ceritakan lelucon!", "Apa hal paling memalukan yang pernah terjadi padamu?",
-            "Jika kamu bisa punya kekuatan super, apa itu?", "Apa pendapat jujurmu tentangku?", "Berikan aku rekomendasi lagu.",
-            "Apa mimpi teranehmu baru-baru ini?", "Hal apa yang membuatmu bahagia hari ini?",
-            "Satu hal yang ingin kamu ubah dari dirimu?", "Deskripsikan dirimu dalam 3 kata.",
-        ];
+            const messageForm = document.getElementById('send-message-form');
+            const messageContent = document.getElementById('message-content');
+            const sendButton = document.getElementById('send-button');
+            const sendStatus = document.getElementById('send-status');
+            const diceButton = document.getElementById('dice-button'); // Pastikan ID ini benar
+            const originalButtonHTML = sendButton.innerHTML;
+            const pollsContainer = document.getElementById('polls-container');
 
-        diceButton.addEventListener('click', () => {
-            const randomIndex = Math.floor(Math.random() * randomPrompts.length);
-            messageContent.value = randomPrompts[randomIndex];
-            messageContent.focus();
-        });
+            const randomPrompts = [ "Apa rahasia terbesarmu?", "Ceritakan lelucon!", "Apa hal paling memalukan?", "Jika punya kekuatan super, apa?", "Pendapat jujurmu tentangku?", "Rekomendasi lagu.", "Mimpi teranehmu?", "Hal bahagia hari ini?", "Satu hal ingin kamu ubah?", "Deskripsikan dirimu 3 kata.", ];
 
-        messageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const contentToSend = messageContent.value.trim();
-            if (!contentToSend) {
-                sendStatus.textContent = 'Pesan tidak boleh kosong.';
-                sendStatus.className = 'message error';
-                setTimeout(() => { sendStatus.textContent = ''; sendStatus.className = 'message'; }, 3000);
-                return;
-            }
-            sendStatus.textContent = 'Mengirim...';
-            sendStatus.className = 'message info';
-            sendButton.disabled = true;
-            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-            try {
-                const response = await fetch(`/api/messages/${recipientUsernameJS}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: contentToSend })
+            // Event Listener untuk Dice
+            if (diceButton && messageContent) {
+                diceButton.addEventListener('click', () => {
+                    const randomIndex = Math.floor(Math.random() * randomPrompts.length);
+                    messageContent.value = randomPrompts[randomIndex];
+                    messageContent.focus();
                 });
-                const result = await response.json();
-                if (response.ok) {
-                    sendStatus.textContent = result.message || 'Pesan berhasil dikirim!';
-                    sendStatus.className = 'message success';
-                    messageContent.value = '';
-                } else {
-                    sendStatus.textContent = result.message || 'Gagal mengirim pesan.';
-                    sendStatus.className = 'message error';
-                }
-            } catch (error) {
-                sendStatus.textContent = 'Terjadi kesalahan. Coba lagi.';
-                sendStatus.className = 'message error';
-            } finally {
-                 sendButton.disabled = false;
-                 sendButton.innerHTML = originalButtonHTML;
-                 setTimeout(() => {
-                    if (!sendStatus.classList.contains('success')) {
-                       sendStatus.textContent = '';
-                       sendStatus.className = 'message';
+            } else {
+                console.error("Element dice atau textarea tidak ditemukan.");
+            }
+
+            // Event Listener untuk Kirim Pesan
+            if (messageForm && recipientUsernameJS) {
+                messageForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const contentToSend = messageContent.value.trim();
+                    if (!contentToSend) {
+                        sendStatus.textContent = 'Pesan tidak boleh kosong.'; sendStatus.className = 'message error';
+                        setTimeout(() => { sendStatus.textContent = ''; sendStatus.className = 'message'; }, 3000);
+                        return;
                     }
-                 }, 5000);
+                    sendStatus.textContent = 'Mengirim...'; sendStatus.className = 'message info';
+                    sendButton.disabled = true; sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+                    try {
+                        const response = await fetch(`/api/messages/${recipientUsernameJS}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: contentToSend }) });
+                        const result = await response.json();
+                        if (response.ok) {
+                            sendStatus.textContent = result.message || 'Pesan berhasil dikirim!'; sendStatus.className = 'message success'; messageContent.value = '';
+                        } else {
+                            sendStatus.textContent = result.message || 'Gagal mengirim pesan.'; sendStatus.className = 'message error';
+                        }
+                    } catch (error) {
+                        sendStatus.textContent = 'Terjadi kesalahan. Coba lagi.'; sendStatus.className = 'message error';
+                    } finally {
+                        sendButton.disabled = false; sendButton.innerHTML = originalButtonHTML;
+                        setTimeout(() => { if (!sendStatus.classList.contains('success')) { sendStatus.textContent = ''; sendStatus.className = 'message'; } }, 5000);
+                    }
+                });
+            } else {
+                if (!recipientUsernameJS) console.error("Username penerima tidak ditemukan di URL.");
+                if (!messageForm) console.error("Form pesan tidak ditemukan.");
+            }
+
+            // Fungsi Polling
+            function getVotedPolls() { try { return JSON.parse(localStorage.getItem('votedPolls') || '{}'); } catch { return {}; } }
+
+            function markPollAsVoted(pollId) { const voted = getVotedPolls(); voted[pollId] = true; try { localStorage.setItem('votedPolls', JSON.stringify(voted)); } catch { console.warn("Tidak bisa menyimpan status vote ke localStorage."); } }
+
+            async function submitPollVote(pollId, optionIndex, buttonElement, feedbackElement, allOptionButtons) {
+                const votedPolls = getVotedPolls();
+                if (votedPolls[pollId]) {
+                    feedbackElement.textContent = 'Anda sudah vote.'; feedbackElement.className = 'poll-feedback error';
+                    return;
+                }
+
+                // Nonaktifkan semua tombol sementara
+                allOptionButtons.forEach(btn => btn.disabled = true);
+                const originalButtonText = buttonElement.textContent;
+                buttonElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Voting...';
+                feedbackElement.textContent = ''; feedbackElement.className = 'poll-feedback';
+
+                try {
+                    const response = await fetch(`/api/polls/${pollId}/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ optionIndex }) });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        feedbackElement.textContent = 'Terima kasih sudah vote!'; feedbackElement.className = 'poll-feedback success';
+                        markPollAsVoted(pollId);
+                        // Tandai tombol yang dipilih dan nonaktifkan semua secara permanen
+                        allOptionButtons.forEach(btn => {
+                            btn.disabled = true; // Nonaktifkan permanen
+                            if (btn === buttonElement) {
+                                btn.classList.add('voted-by-user'); // Style berbeda untuk yang dipilih
+                            }
+                        });
+                    } else {
+                        feedbackElement.textContent = result.message || 'Gagal vote.'; feedbackElement.className = 'poll-feedback error';
+                        allOptionButtons.forEach(btn => btn.disabled = false); // Aktifkan kembali jika gagal
+                        buttonElement.innerHTML = originalButtonText;
+                    }
+                } catch (error) {
+                    feedbackElement.textContent = 'Error jaringan.'; feedbackElement.className = 'poll-feedback error';
+                    allOptionButtons.forEach(btn => btn.disabled = false); // Aktifkan kembali jika error
+                    buttonElement.innerHTML = originalButtonText;
+                }
+            }
+
+            function renderPoll(poll) {
+                const votedPolls = getVotedPolls();
+                const hasVoted = votedPolls[poll._id];
+                const pollDiv = document.createElement('div'); pollDiv.className = 'poll-display-section'; pollDiv.dataset.pollId = poll._id;
+                const questionDiv = document.createElement('div'); questionDiv.className = 'poll-question'; questionDiv.textContent = poll.question;
+                const optionsDiv = document.createElement('div'); optionsDiv.className = 'poll-options';
+                const feedbackDiv = document.createElement('div'); feedbackDiv.className = 'poll-feedback'; // Pindahkan feedback ke sini
+                const currentPollOptionButtons = []; // Tampung tombol opsi untuk polling ini
+
+                poll.options.forEach((option, index) => {
+                    const button = document.createElement('button'); button.textContent = option.text; button.dataset.optionIndex = index; button.disabled = hasVoted;
+                    currentPollOptionButtons.push(button); // Tambahkan ke array
+                    if (hasVoted) {
+                        // Jika sudah vote, tidak perlu event click, cukup disable
+                        button.onclick = null;
+                    } else {
+                         button.onclick = () => submitPollVote(poll._id, index, button, feedbackDiv, currentPollOptionButtons); // Kirim array tombol
+                    }
+                    optionsDiv.appendChild(button);
+                });
+
+                if (hasVoted) { feedbackDiv.textContent = 'Anda sudah vote untuk polling ini.'; } // Tampilkan status jika sudah vote
+
+                pollDiv.appendChild(questionDiv);
+                pollDiv.appendChild(optionsDiv);
+                pollDiv.appendChild(feedbackDiv); // Tambahkan feedback di akhir
+                return pollDiv;
+            }
+
+            async function loadActivePolls() {
+                if (!pollsContainer || !recipientUsernameJS) {
+                    console.error("Polls container atau username penerima tidak ditemukan.");
+                    return; // Hentikan jika elemen penting tidak ada
+                }
+                pollsContainer.innerHTML = '<p style="text-align: center; color: white; opacity: 0.8;">Memuat polling...</p>'; // Indikator loading
+                try {
+                    const response = await fetch(`/api/polls/active/${recipientUsernameJS}`);
+                    if (!response.ok) {
+                         console.error(`Gagal memuat polling: ${response.status} ${response.statusText}`);
+                         pollsContainer.innerHTML = '<p style="text-align: center; color: #ffebee;">Gagal memuat polling.</p>'; // Tampilkan error
+                         return;
+                    }
+                    const polls = await response.json();
+                    pollsContainer.innerHTML = ''; // Kosongkan container setelah fetch berhasil
+
+                    if (polls.length > 0) {
+                        const header = document.createElement('h3');
+                        header.textContent = 'Ikut Polling:';
+                        header.style.color = 'white'; // Sesuaikan style header
+                        header.style.textShadow = '0 1px 2px rgba(0, 0, 0, .2)';
+                        pollsContainer.appendChild(header);
+                        polls.forEach(poll => pollsContainer.appendChild(renderPoll(poll)));
+                    } else {
+                        // Jangan tampilkan apa pun jika tidak ada polling aktif
+                        // pollsContainer.innerHTML = '<p style="text-align: center; color: white; opacity: 0.8;">Tidak ada polling aktif saat ini.</p>';
+                    }
+                } catch (error) {
+                    console.error("Error loading polls:", error);
+                    pollsContainer.innerHTML = '<p style="text-align: center; color: #ffebee;">Terjadi kesalahan saat memuat polling.</p>'; // Tampilkan error
+                }
+            }
+
+            // Muat polling setelah DOM siap dan username ada
+            if (recipientUsernameJS) {
+                loadActivePolls();
             }
         });
     </script>

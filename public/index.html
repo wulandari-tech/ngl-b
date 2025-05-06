@@ -12,8 +12,8 @@
         .auth-form{width:50%;padding:30px;box-sizing:border-box;display:flex;flex-direction:column}
         .auth-form h1{font-size:1.8em;margin-bottom:10px;color:#333;text-align:center}
         .auth-form h2{margin-top:0;margin-bottom:20px;font-size:1.6em;color:#444;text-align:center}
-        .auth-form input[type=text],.auth-form input[type=password]{width:100%;padding:12px;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:1em}
-        .auth-form input[type=text]:focus,.auth-form input[type=password]:focus{border-color:#f67280;outline:0;box-shadow:0 0 8px rgba(246,114,128,.3)}
+        .auth-form input[type=text],.auth-form input[type=email],.auth-form input[type=password]{width:100%;padding:12px;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:1em}
+        .auth-form input[type=text]:focus,.auth-form input[type=email]:focus,.auth-form input[type=password]:focus{border-color:#f67280;outline:0;box-shadow:0 0 8px rgba(246,114,128,.3)}
         .auth-form button{background-color:#f67280;color:#fff;padding:12px;border:none;border-radius:25px;cursor:pointer;font-size:1.1em;font-weight:700;width:100%;margin-top:10px;transition:background-color .2s ease,transform .1s ease}
         .auth-form button:hover{background-color:#c06c84}
         .auth-form button:active{transform:scale(.98)}
@@ -30,7 +30,7 @@
         .forgot-password-section.visible{max-height:400px;opacity:1;padding-top:20px;padding-bottom:30px}
         .forgot-password-section h2{font-size:1.6em;color:#444;text-align:center;margin-top:0;margin-bottom:15px}
         .forgot-password-section p{font-size:.9em;color:#666;text-align:center;margin-bottom:20px}
-        .forgot-password-section input[type=text]{width:100%;padding:12px;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:1em}
+        .forgot-password-section input[type=email]{width:100%;padding:12px;margin-bottom:15px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box;font-size:1em}
         .forgot-password-section button{background-color:#ff9a8b;color:#fff;padding:12px;border:none;border-radius:25px;cursor:pointer;font-size:1.1em;font-weight:700;width:100%;margin-top:10px;transition:background-color .2s ease,transform .1s ease}
         .forgot-password-section button:hover{background-color:#ff6a88}
         .forgot-password-section .back-to-login{text-align:center;margin-top:20px;font-size:.9em}
@@ -50,13 +50,13 @@
                 <h2>Akun Baru</h2>
                 <form id="register-form">
                     <input type="text" id="reg-username" placeholder="Username" required autocomplete="username">
+                    <input type="email" id="reg-email" placeholder="Email Aktif Anda" required autocomplete="email">
                     <input type="password" id="reg-password" placeholder="Password (min. 6 karakter)" required autocomplete="new-password">
                     <button type="submit"><i class="fas fa-user-plus"></i> Daftar</button>
                     <p id="register-message" class="message"></p>
                 </form>
                 <p class="switch-form">Sudah punya akun? <a href="#" id="show-login">Masuk di sini</a></p>
             </div>
-
             <div id="login-section" class="auth-form">
                  <h1>NGL Clone</h1>
                  <h2>Masuk ke Akun Anda</h2>
@@ -72,19 +72,17 @@
                 <p class="switch-form">Belum punya akun? <a href="#" id="show-register">Daftar di sini</a></p>
             </div>
         </div>
-
          <div id="forgot-password-section" class="forgot-password-section">
              <h2>Lupa Password</h2>
-             <p>Masukkan username Anda. Link reset akan dikirim jika akun ditemukan.</p>
+             <p>Masukkan email yang terdaftar pada akun Anda. Link reset akan dikirimkan ke email tersebut.</p>
              <form id="forgot-password-form">
-                 <input type="text" id="forgot-email-username" placeholder="Username Anda" required autocomplete="username">
+                 <input type="email" id="forgot-email" placeholder="Email Terdaftar Anda" required autocomplete="email">
                  <button type="submit"><i class="fas fa-paper-plane"></i> Kirim Link Reset</button>
                  <p id="forgot-message" class="message"></p>
              </form>
              <p class="back-to-login"><a href="#" id="back-to-login">Kembali ke Login</a></p>
          </div>
     </div>
-
     <script>
         const formsWrapper = document.querySelector('.forms-wrapper');
         const loginSection = document.getElementById('login-section');
@@ -101,41 +99,30 @@
         const loginMessage = document.getElementById('login-message');
         const forgotMessage = document.getElementById('forgot-message');
 
-        function showLoginForm() {
-            formsWrapper.classList.remove('show-forgot');
-            forgotPasswordSection.classList.remove('visible');
-            loginMessage.textContent = ''; loginMessage.className = 'message';
-            forgotMessage.textContent = ''; forgotMessage.className = 'message';
-            formsWrapper.classList.add('show-login');
-        }
-         function showRegisterForm() {
-            formsWrapper.classList.remove('show-login');
-            formsWrapper.classList.remove('show-forgot');
-            forgotPasswordSection.classList.remove('visible');
-            registerMessage.textContent = ''; registerMessage.className = 'message';
-            forgotMessage.textContent = ''; forgotMessage.className = 'message';
-        }
-        function showForgotPasswordForm() {
-            formsWrapper.classList.add('show-forgot');
-            forgotPasswordSection.classList.add('visible');
-            loginMessage.textContent = ''; loginMessage.className = 'message';
-            registerMessage.textContent = ''; registerMessage.className = 'message';
-        }
+        function showLoginForm() { formsWrapper.classList.remove('show-forgot'); forgotPasswordSection.classList.remove('visible'); loginMessage.textContent = ''; loginMessage.className = 'message'; forgotMessage.textContent = ''; forgotMessage.className = 'message'; formsWrapper.classList.add('show-login'); }
+        function showRegisterForm() { formsWrapper.classList.remove('show-login'); formsWrapper.classList.remove('show-forgot'); forgotPasswordSection.classList.remove('visible'); registerMessage.textContent = ''; registerMessage.className = 'message'; forgotMessage.textContent = ''; forgotMessage.className = 'message'; }
+        function showForgotPasswordForm() { formsWrapper.classList.add('show-forgot'); forgotPasswordSection.classList.add('visible'); loginMessage.textContent = ''; loginMessage.className = 'message'; registerMessage.textContent = ''; registerMessage.className = 'message'; }
 
         showLoginLink.addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
         showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); showRegisterForm(); });
         showForgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); showForgotPasswordForm(); });
-         backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
+        backToLoginLink.addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
 
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault(); registerMessage.textContent = ''; registerMessage.className = 'message';
             const sb = registerForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendaftar...';
-            const u = document.getElementById('reg-username').value; const p = document.getElementById('reg-password').value;
+            const u = document.getElementById('reg-username').value; const em = document.getElementById('reg-email').value; const p = document.getElementById('reg-password').value;
             try {
-                const response = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+                const response = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, email: em, password: p }) });
                 const result = await response.json();
-                if (response.ok) { registerMessage.textContent = result.message + ' Mengalihkan...'; registerMessage.className = 'message success'; setTimeout(() => { window.location.href = '/inbox'; }, 1500); }
-                else { registerMessage.textContent = result.message || 'Pendaftaran gagal.'; registerMessage.className = 'message error'; sb.disabled = false; sb.innerHTML = '<i class="fas fa-user-plus"></i> Daftar';}
+                if (response.ok && result.newUser) { // Cek flag newUser
+                    registerMessage.textContent = result.message + ' Mengalihkan...'; registerMessage.className = 'message success';
+                    // Arahkan ke inbox dengan query parameter untuk tour
+                    setTimeout(() => { window.location.href = '/inbox?tour=true'; }, 1500);
+                } else if (response.ok) { // Jika registrasi sukses tapi bukan user baru (seharusnya tidak terjadi dengan logika ini)
+                     registerMessage.textContent = result.message + ' Mengalihkan...'; registerMessage.className = 'message success';
+                     setTimeout(() => { window.location.href = '/inbox'; }, 1500);
+                } else { registerMessage.textContent = result.message || 'Pendaftaran gagal.'; registerMessage.className = 'message error'; sb.disabled = false; sb.innerHTML = '<i class="fas fa-user-plus"></i> Daftar';}
             } catch (error) { registerMessage.textContent = 'Terjadi kesalahan.'; registerMessage.className = 'message error'; sb.disabled = false; sb.innerHTML = '<i class="fas fa-user-plus"></i> Daftar'; }
         });
 
@@ -146,7 +133,7 @@
             try {
                 const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
                 const result = await response.json();
-                if (response.ok) { loginMessage.textContent = result.message + ' Mengalihkan...'; loginMessage.className = 'message success'; setTimeout(() => { window.location.href = '/inbox'; }, 1500); }
+                if (response.ok) { loginMessage.textContent = result.message + ' Mengalihkan...'; loginMessage.className = 'message success'; setTimeout(() => { window.location.href = '/inbox'; }, 1500); } // Arahkan ke inbox biasa
                 else { loginMessage.textContent = result.message || 'Login gagal.'; loginMessage.className = 'message error'; sb.disabled = false; sb.innerHTML = '<i class="fas fa-right-to-bracket"></i> Masuk';}
             } catch (error) { loginMessage.textContent = 'Terjadi kesalahan.'; loginMessage.className = 'message error'; sb.disabled = false; sb.innerHTML = '<i class="fas fa-right-to-bracket"></i> Masuk'; }
         });
@@ -154,13 +141,12 @@
         forgotPasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault(); forgotMessage.textContent = ''; forgotMessage.className = 'message';
             const sb = forgotPasswordForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-            const emailOrUsername = document.getElementById('forgot-email-username').value;
+            const email = document.getElementById('forgot-email').value;
             try {
-                const response = await fetch('/api/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emailOrUsername: emailOrUsername }) });
+                const response = await fetch('/api/forgot-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) });
                 const result = await response.json();
-                forgotMessage.textContent = result.message || 'Jika akun terdaftar, email reset password akan dikirim.';
-                forgotMessage.className = 'message success';
-                document.getElementById('forgot-email-username').value = '';
+                forgotMessage.textContent = result.message || 'Jika email terdaftar, link reset password telah dikirim.';
+                forgotMessage.className = 'message success'; document.getElementById('forgot-email').value = '';
             } catch (error) { console.error("Forgot password submit error:", error); forgotMessage.textContent = 'Terjadi kesalahan. Coba lagi nanti.'; forgotMessage.className = 'message error';
             } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Link Reset'; }
         });

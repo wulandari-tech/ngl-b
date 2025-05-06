@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inbox Saya - NGL Clone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
     <script src="/socket.io/socket.io.js"></script>
     <style>
         body{font-family:sans-serif;margin:0;color:#333;line-height:1.6;background:linear-gradient(135deg,#f8b195,#f67280,#c06c84);background-attachment:fixed;padding:20px 0}
@@ -19,10 +20,10 @@
         .edit-section label{display:block;margin-bottom:6px;font-weight:700;font-size:.9em;color:#555}
         .edit-section input[type=text]{width:calc(100% - 95px);padding:8px 10px;border-radius:5px;border:1px solid #ccc;margin-right:5px;font-size:.95em}
         .edit-section input[type=file]{font-size:.9em;margin-bottom:8px;display:block}
-        .edit-section button{padding:9px 15px;font-size:.9em;background-color:#f67280;color:#fff;border:none;border-radius:20px;cursor:pointer;transition:background-color .2s ease}
-        .edit-section button:hover{background-color:#c06c84}
-        .edit-section button:disabled{background-color:#ccc;cursor:not-allowed}
-        .edit-section button i{margin-right:5px}
+        .edit-section button,.poll-section button{padding:9px 15px;font-size:.9em;background-color:#f67280;color:#fff;border:none;border-radius:20px;cursor:pointer;transition:background-color .2s ease}
+        .edit-section button:hover,.poll-section button:hover{background-color:#c06c84}
+        .edit-section button:disabled,.poll-section button:disabled{background-color:#ccc;cursor:not-allowed}
+        .edit-section button i,.poll-section button i{margin-right:5px}
         .update-status{margin-top:8px;font-size:.9em;min-height:1.1em}
         .update-status:empty{display:none}
         .update-status.success{color:green}
@@ -40,7 +41,12 @@
         #copy-status:empty{display:none}
         #copy-status.success{color:green}
         #copy-status.error{color:red}
-        #inbox-content-area{margin-top:30px;padding-top:20px;border-top:1px solid #eee}
+        .tabs{display:flex;border-bottom:1px solid #eee;margin-bottom:20px;margin-top: 25px;}
+        .tab-button{padding:10px 15px;cursor:pointer;border:none;background:none;font-size:1em;color:#777;margin-bottom:-1px;border-bottom:3px solid transparent;}
+        .tab-button.active{color:#f67280;border-bottom:3px solid #f67280;font-weight:bold;}
+        .tab-content{display:none;}
+        .tab-content.active{display:block;}
+        #inbox-content-area{margin-top:0;padding-top:0;border-top:none;}
         .message-list{list-style:none;padding:0;margin:0}
         .message-list li#loading-placeholder,.message-list li#no-messages-placeholder{text-align:center;color:#777;padding:20px;font-style:italic}
         .message-item{background:#fff;border:1px solid #eee;padding:15px 20px;margin-bottom:15px;border-radius:10px;border-left:5px solid #f8b195;position:relative;box-shadow:0 2px 5px rgba(0,0,0,.05);transition:background-color .2s ease}
@@ -62,7 +68,7 @@
         #inbox-indicator.has-unread #unread-badge{display:block}
         .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:1001;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
         .modal-overlay.show{opacity:1;visibility:visible}
-        .modal-content{background-color:#fff;padding:25px 30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.2);width:90%;max-width:500px;position:relative;transform:scale(.9);transition:transform .3s ease}
+        .modal-content{background-color:#fff;padding:25px 30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.2);width:90%;max-width:500px;position:relative;transform:scale(.9);transition:transform .3s ease; max-height: 90vh; overflow-y: auto;}
         .modal-overlay.show .modal-content{transform:scale(1)}
         .close-button{position:absolute;top:10px;right:15px;background:0 0;border:none;font-size:1.8em;color:#aaa;cursor:pointer;padding:0;line-height:1}
         .close-button:hover{color:#777}
@@ -72,7 +78,15 @@
         .original-message-display strong{color:#555}
         .reply-input-area label{display:block;margin-bottom:5px;font-weight:700;font-size:.9em;color:#444}
         .reply-input-area textarea{width:100%;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:1em;min-height:60px;resize:vertical;margin-bottom:20px}
-        .modal-actions{text-align:right;display:flex;justify-content:flex-end;align-items:center}
+        .theme-selection-area{margin-bottom:20px;border-top:1px solid #eee;padding-top:15px;}
+        .theme-selection-area label{display:block;margin-bottom:10px;font-weight:bold;font-size:.9em;color:#444;}
+        .theme-options{display:flex;flex-wrap:wrap;gap:10px;}
+        .theme-option{display:flex;align-items:center;cursor:pointer;padding:5px;border:1px solid transparent;border-radius:5px;}
+        .theme-option input[type="radio"]{margin-right:8px; accent-color: #f67280;}
+        .theme-option .theme-preview{width:25px;height:25px;border-radius:4px;margin-right:8px;border:1px solid #ccc;background-size:cover;}
+        .theme-option .theme-name{font-size:0.9em;}
+        .theme-option input[type="radio"]:checked + .theme-preview + .theme-name{font-weight:bold;color:#c06c84;}
+        .modal-actions{text-align:right;display:flex;justify-content:flex-end;align-items:center;margin-top:10px;}
         #modal-username-display{font-size:.85em;color:#555;margin-right:auto}
         #download-reply-button{background-color:#f67280;color:#fff;padding:10px 15px;border:none;border-radius:20px;cursor:pointer;font-size:.95em;transition:background-color .2s ease}
         #download-reply-button:hover{background-color:#c06c84}
@@ -91,286 +105,125 @@
         #delete-all-status.error{color:red}
         #delete-all-status.success{color:green}
         #delete-all-status.info{color:orange}
+        .poll-section{padding:15px;border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px;}
+        .poll-section h3{margin-top:0;text-align:left;font-size:1.2em;margin-bottom:15px;}
+        .poll-section input[type=text], .poll-section textarea{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ccc;border-radius:5px;box-sizing:border-box;font-size:1em;}
+        .poll-options-container .poll-option-input{display:flex;align-items:center;margin-bottom:8px;}
+        .poll-options-container input[type=text]{flex-grow:1;margin-bottom:0;margin-right:5px;}
+        .poll-options-container button{padding:5px 10px;font-size:0.8em;background-color:#6c757d;}
+        .poll-options-container button:hover{background-color:#5a6268;}
+        #add-poll-option-button{margin-top:5px;display:inline-block; width: auto;}
+        #create-poll-status{text-align:left; margin-top: 10px;}
+        .poll-list{list-style:none;padding:0;margin:0;}
+        .poll-item{background:#f9f9f9;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #eee;}
+        .poll-item-question{font-weight:bold;margin-bottom:10px;word-wrap:break-word;}
+        .poll-item-options li{margin-bottom:8px;font-size:0.95em;}
+        .poll-option-text{margin-right:5px;}
+        .poll-option-votes{font-weight:bold;margin-left:5px;color:#555;}
+        .poll-option-bar-container{background-color:#e9ecef;border-radius:5px;overflow:hidden;height:10px;margin-top:3px;}
+        .poll-option-bar{background-color:#f67280;height:100%;width:0%;transition:width 0.5s ease;}
+        .poll-item-actions{margin-top:10px;text-align:right;}
+        .poll-item-actions button{padding:5px 10px;font-size:0.8em;margin-left:5px;}
+        .poll-item-status{font-size:0.8em;color:#6c757d;margin-right:10px;display:inline-block;font-style: italic;}
         @media (max-width:600px){.container{padding:20px}h1{font-size:1.6em}.edit-section input[type=text]{width:calc(100% - 85px)}#inbox-indicator{width:40px;height:40px;font-size:1.1em;bottom:15px;right:15px;top:auto}#unread-badge{width:18px;height:18px;line-height:18px;font-size:.65em}.modal-content{padding:20px}}
     </style>
 </head>
 <body>
-    <div id="inbox-indicator" style="display: none;">
-        <i class="fas fa-envelope"></i>
-        <span id="unread-badge"></span>
-    </div>
-
+    <div id="inbox-indicator" style="display: none;"> <i class="fas fa-envelope"></i> <span id="unread-badge"></span> </div>
     <div class="container">
-        <h1>Inbox Saya</h1>
-        <div class="delete-all-section">
-             <button id="delete-all-messages-button" class="danger-button">
-                 <i class="fas fa-trash-alt"></i> Hapus Semua Pesan
-             </button>
-             <p id="delete-all-status" class="update-status" style="margin-top: 8px;"></p>
+        <h1>Akun Saya</h1>
+        <div class="profile-info"> <img src="https://via.placeholder.com/60" alt="Avatar" id="user-avatar-inbox"> <div class="profile-details"> <p>Username: <strong id="username-display-inbox">Memuat...</strong></p> <p>Prompt Saat Ini: <strong id="current-prompt-display">Memuat...</strong></p> </div> </div>
+        <div class="edit-section"> <form id="prompt-form"> <label for="new-prompt">Ubah Prompt Anda:</label> <div> <input type="text" id="new-prompt" name="prompt" placeholder="Tulis prompt baru..." required maxlength="100"> <button type="submit"><i class="fas fa-save"></i> Simpan</button> </div> <p id="prompt-update-status" class="update-status"></p> </form> <form id="avatar-form"> <label for="avatar-file">Ubah Foto Profil:</label> <div> <input type="file" id="avatar-file" name="avatar" accept="image/*" required> <button type="submit"><i class="fas fa-upload"></i> Upload</button> </div> <p id="avatar-update-status" class="update-status"></p> </form> </div>
+        <div class="ngl-link-section"> <p>Bagikan Link NGL Anda:</p> <p><a href="#" id="ngl-link" target="_blank">Memuat link...</a></p> </div>
+        <div class="copy-action"> <button id="copy-link-button"><i class="fas fa-copy"></i> Salin Link</button> <span id="copy-status"></span> </div>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="inbox-tab"><i class="fas fa-envelope"></i> Inbox</button>
+            <button class="tab-button" data-tab="polling-tab"><i class="fas fa-poll"></i> Polling</button>
         </div>
 
-        <div class="profile-info">
-            <img src="https://via.placeholder.com/60" alt="Avatar" id="user-avatar-inbox">
-            <div class="profile-details">
-                <p>Username: <strong id="username-display-inbox">Memuat...</strong></p>
-                <p>Prompt Saat Ini: <strong id="current-prompt-display">Memuat...</strong></p>
+        <div id="inbox-tab" class="tab-content active">
+            <div class="delete-all-section"> <button id="delete-all-messages-button" class="danger-button"> <i class="fas fa-trash-alt"></i> Hapus Semua Pesan</button> <p id="delete-all-status" class="update-status" style="margin-top: 8px;"></p> </div>
+            <div id="inbox-content-area"> <ul id="message-list" class="message-list"> <li id="loading-placeholder">Memuat pesan...</li> </ul> </div>
+        </div>
+
+        <div id="polling-tab" class="tab-content">
+             <div class="poll-section">
+                 <h3>Buat Polling Baru</h3>
+                 <form id="create-poll-form">
+                     <label for="poll-question">Pertanyaan Polling:</label>
+                     <input type="text" id="poll-question" name="question" placeholder="Masukkan pertanyaan polling..." required maxlength="280">
+                     <label>Opsi Jawaban (minimal 2):</label>
+                     <div id="poll-options-container">
+                         <div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 1" required maxlength="100"></div>
+                         <div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 2" required maxlength="100"></div>
+                     </div>
+                     <button type="button" id="add-poll-option-button"><i class="fas fa-plus"></i> Tambah Opsi</button>
+                     <button type="submit" style="display: block; width: 100%; margin-top: 15px;"><i class="fas fa-check"></i> Buat Polling</button>
+                     <p id="create-poll-status" class="update-status"></p>
+                 </form>
+             </div>
+             <div class="poll-section">
+                <h3>Polling Saya</h3>
+                <ul id="my-polls-list" class="poll-list">
+                    <li id="loading-polls-placeholder">Memuat polling...</li>
+                </ul>
             </div>
         </div>
 
-        <div class="edit-section">
-             <form id="prompt-form">
-                 <label for="new-prompt">Ubah Prompt Anda:</label>
-                 <div>
-                     <input type="text" id="new-prompt" name="prompt" placeholder="Tulis prompt baru..." required maxlength="100">
-                     <button type="submit"><i class="fas fa-save"></i> Simpan</button>
-                 </div>
-                 <p id="prompt-update-status" class="update-status"></p>
-             </form>
-
-             <form id="avatar-form">
-                 <label for="avatar-file">Ubah Foto Profil:</label>
-                 <div>
-                    <input type="file" id="avatar-file" name="avatar" accept="image/*" required>
-                    <button type="submit"><i class="fas fa-upload"></i> Upload</button>
-                 </div>
-                  <p id="avatar-update-status" class="update-status"></p>
-             </form>
-         </div>
-
-        <div class="ngl-link-section">
-             <p>Bagikan Link NGL Anda:</p>
-             <p><a href="#" id="ngl-link" target="_blank">Memuat link...</a></p>
-        </div>
-        <div class="copy-action">
-             <button id="copy-link-button"><i class="fas fa-copy"></i> Salin Link</button>
-             <span id="copy-status"></span>
-        </div>
-
-        <div id="inbox-content-area" style="display: none;">
-             <ul id="message-list" class="message-list">
-                 <li id="loading-placeholder">Memuat pesan...</li>
-             </ul>
-             <button id="logout-button"><i class="fas fa-right-from-bracket"></i> Logout</button>
-        </div>
+        <button id="logout-button"><i class="fas fa-right-from-bracket"></i> Logout</button>
     </div>
 
-     <div id="share-modal" class="modal-overlay">
-            <div class="modal-content">
-                <button id="close-modal-button" class="close-button">×</button>
-                <h3>Bagikan Balasan Anda</h3>
-                <div class="original-message-display">
-                    <p><strong>Pesan Anonim:</strong></p>
-                    <p id="modal-original-message"></p>
-                </div>
-                <div class="reply-input-area">
-                    <label for="modal-reply-text">Balasan Anda:</label>
-                    <textarea id="modal-reply-text" rows="3" placeholder="Tulis balasan Anda di sini..."></textarea>
-                </div>
-                <div class="modal-actions">
-                     <span id="modal-username-display" ></span>
-                     <span id="download-status"></span>
-                     <button id="download-reply-button"><i class="fas fa-download"></i> Unduh Gambar</button>
-                </div>
-            </div>
-     </div>
+    <div id="share-modal" class="modal-overlay"> <div class="modal-content"> <button id="close-modal-button" class="close-button">×</button> <h3>Bagikan Balasan Anda</h3> <div class="original-message-display"> <p><strong>Pesan Anonim:</strong></p> <p id="modal-original-message"></p> </div> <div class="reply-input-area"> <label for="modal-reply-text">Balasan Anda:</label> <textarea id="modal-reply-text" rows="3" placeholder="Tulis balasan Anda di sini..."></textarea> </div> <div class="theme-selection-area"> <label>Pilih Tema Gambar:</label> <div id="theme-options-container" class="theme-options"></div> </div> <div class="modal-actions"> <span id="modal-username-display" ></span> <span id="download-status"></span> <button id="download-reply-button" disabled><i class="fas fa-download"></i> Unduh Gambar</button> </div> </div> </div>
 
+    <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
     <script>
-        const messageList = document.getElementById('message-list');
-        const nglLinkEl = document.getElementById('ngl-link');
-        const copyButton = document.getElementById('copy-link-button');
-        const copyStatus = document.getElementById('copy-status');
-        const logoutButton = document.getElementById('logout-button');
-        const loadingPlaceholder = document.getElementById('loading-placeholder');
-        const userAvatarInbox = document.getElementById('user-avatar-inbox');
-        const usernameDisplayInbox = document.getElementById('username-display-inbox');
-        const currentPromptDisplay = document.getElementById('current-prompt-display');
-        const promptForm = document.getElementById('prompt-form');
-        const newPromptInput = document.getElementById('new-prompt');
-        const promptUpdateStatus = document.getElementById('prompt-update-status');
-        const avatarForm = document.getElementById('avatar-form');
-        const avatarFile = document.getElementById('avatar-file');
-        const avatarUpdateStatus = document.getElementById('avatar-update-status');
-        const inboxIndicator = document.getElementById('inbox-indicator');
-        const unreadBadge = document.getElementById('unread-badge');
-        const inboxContentArea = document.getElementById('inbox-content-area');
-        const modalOverlay = document.getElementById('share-modal');
-        const modalContent = modalOverlay.querySelector('.modal-content');
-        const closeModalButton = document.getElementById('close-modal-button');
-        const modalOriginalMessage = document.getElementById('modal-original-message');
-        const modalReplyText = document.getElementById('modal-reply-text');
-        const downloadButton = document.getElementById('download-reply-button');
-        const downloadStatus = document.getElementById('download-status');
-        const modalUsernameDisplay = document.getElementById('modal-username-display');
-        const deleteAllButton = document.getElementById('delete-all-messages-button');
-        const deleteAllStatus = document.getElementById('delete-all-status');
+        const messageList = document.getElementById('message-list'); const nglLinkEl = document.getElementById('ngl-link'); const copyButton = document.getElementById('copy-link-button'); const copyStatus = document.getElementById('copy-status'); const logoutButton = document.getElementById('logout-button'); const loadingPlaceholder = document.getElementById('loading-placeholder'); const userAvatarInbox = document.getElementById('user-avatar-inbox'); const usernameDisplayInbox = document.getElementById('username-display-inbox'); const currentPromptDisplay = document.getElementById('current-prompt-display'); const promptForm = document.getElementById('prompt-form'); const newPromptInput = document.getElementById('new-prompt'); const promptUpdateStatus = document.getElementById('prompt-update-status'); const avatarForm = document.getElementById('avatar-form'); const avatarFile = document.getElementById('avatar-file'); const avatarUpdateStatus = document.getElementById('avatar-update-status'); const inboxIndicator = document.getElementById('inbox-indicator'); const unreadBadge = document.getElementById('unread-badge'); const inboxContentArea = document.getElementById('inbox-content-area'); const modalOverlay = document.getElementById('share-modal'); const modalContent = modalOverlay.querySelector('.modal-content'); const closeModalButton = document.getElementById('close-modal-button'); const modalOriginalMessage = document.getElementById('modal-original-message'); const modalReplyText = document.getElementById('modal-reply-text'); const downloadButton = document.getElementById('download-reply-button'); const downloadStatus = document.getElementById('download-status'); const modalUsernameDisplay = document.getElementById('modal-username-display'); const deleteAllButton = document.getElementById('delete-all-messages-button'); const deleteAllStatus = document.getElementById('delete-all-status'); const tabsContainer = document.querySelector('.tabs'); const tabButtons = document.querySelectorAll('.tab-button'); const tabContents = document.querySelectorAll('.tab-content'); const createPollForm = document.getElementById('create-poll-form'); const pollOptionsContainer = document.getElementById('poll-options-container'); const addPollOptionButton = document.getElementById('add-poll-option-button'); const createPollStatus = document.getElementById('create-poll-status'); const myPollsList = document.getElementById('my-polls-list'); const loadingPollsPlaceholder = document.getElementById('loading-polls-placeholder'); const themeOptionsContainer = document.getElementById('theme-options-container');
 
-        let currentMessageContent = '';
-        let loggedInUsername = '';
-        let currentMessageId = null;
+        let currentMessageContent = ''; let loggedInUsername = ''; let currentMessageId = null; let selectedTheme = null;
 
-        function renderMessage(msg) {
-            const item = document.createElement('li');
-            item.className = 'message-item clickable-message';
-            item.dataset.id = msg._id;
-            item.dataset.content = msg.content;
-            if (msg.isRead === false) { item.classList.add('unread'); }
-            const content = document.createElement('p'); content.textContent = msg.content;
-            const time = document.createElement('span'); time.className = 'message-time';
-            time.textContent = new Date(msg.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-            const shareButton = document.createElement('button'); shareButton.innerHTML = '<i class="fas fa-share-square"></i> Balas'; shareButton.className = 'share-reply-button';
-            item.appendChild(content); item.appendChild(time); item.appendChild(shareButton);
-            return item;
-        }
+        const replyThemes = [ { id: 'sunset', name: 'Sunset', type: 'gradient', colors: ['#f8b195', '#f67280', '#c06c84'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, { id: 'ocean', name: 'Ocean', type: 'gradient', colors: ['#2193b0', '#6dd5ed'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, { id: 'forest', name: 'Forest', type: 'gradient', colors: ['#134E5E', '#71B280'], fontColor: '#ffffff', fontFamily: 'serif', fontWeight: 'normal' }, { id: 'bubblegum', name: 'Bubblegum', type: 'gradient', colors: ['#ff758c', '#ff7eb3'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'bold'}, { id: 'plain_white', name: 'Putih', type: 'solid', colors: ['#ffffff'], fontColor: '#333333', fontFamily: 'sans-serif', fontWeight: 'bold' }, { id: 'plain_black', name: 'Hitam', type: 'solid', colors: ['#222222'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, ];
 
+        function populateThemeOptions() { themeOptionsContainer.innerHTML = ''; replyThemes.forEach((theme, index) => { const label = document.createElement('label'); label.className = 'theme-option'; label.htmlFor = `theme-${theme.id}`; const radio = document.createElement('input'); radio.type = 'radio'; radio.id = `theme-${theme.id}`; radio.name = 'replyTheme'; radio.value = theme.id; radio.required = true; if (index === 0) { radio.checked = true; selectedTheme = theme; downloadButton.disabled = !modalReplyText.value.trim(); } radio.addEventListener('change', () => { selectedTheme = theme; downloadButton.disabled = !modalReplyText.value.trim(); }); const preview = document.createElement('div'); preview.className = 'theme-preview'; if (theme.type === 'gradient') { preview.style.background = `linear-gradient(45deg, ${theme.colors.join(', ')})`; } else { preview.style.backgroundColor = theme.colors[0]; } const name = document.createElement('span'); name.className = 'theme-name'; name.textContent = theme.name; label.appendChild(radio); label.appendChild(preview); label.appendChild(name); themeOptionsContainer.appendChild(label); }); }
+        populateThemeOptions(); // Panggil sekali saat load
+
+        function renderMessage(msg) { const item = document.createElement('li'); item.className = 'message-item clickable-message'; item.dataset.id = msg._id; item.dataset.content = msg.content; if (msg.isRead === false) { item.classList.add('unread'); } const content = document.createElement('p'); content.textContent = msg.content; const time = document.createElement('span'); time.className = 'message-time'; time.textContent = new Date(msg.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); const shareButton = document.createElement('button'); shareButton.innerHTML = '<i class="fas fa-share-square"></i> Balas'; shareButton.className = 'share-reply-button'; item.appendChild(content); item.appendChild(time); item.appendChild(shareButton); return item; }
         function displayNoMessages() { messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link Anda!</li>'; }
-
-        async function fetchMessages() {
-            try {
-                const response = await fetch('/api/my-messages');
-                if (!response.ok) { if (response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal memuat pesan'); }
-                const messages = await response.json();
-                const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove();
-                messageList.innerHTML = '';
-                if (messages.length === 0) { displayNoMessages(); }
-                else { messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); }); }
-            } catch (error) { console.error(error); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan.</li>'; }
-        }
-
-        async function fetchUserInfo() {
-             try {
-                 const response = await fetch('/api/me'); if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal mengambil info user'); }
-                 const userData = await response.json(); loggedInUsername = userData.username;
-                 usernameDisplayInbox.textContent = userData.username; currentPromptDisplay.textContent = userData.prompt || '-';
-                 userAvatarInbox.src = userData.profilePictureUrl || "https://via.placeholder.com/60"; newPromptInput.value = userData.prompt || '';
-                 const fullLink = `${window.location.origin}/ngl/${userData.username}`; nglLinkEl.textContent = fullLink; nglLinkEl.href = fullLink;
-                 updateUnreadIndicator(userData.unreadCount || 0); modalUsernameDisplay.textContent = `@${loggedInUsername}`;
-             } catch (error) { console.error(error); usernameDisplayInbox.textContent = 'Error'; currentPromptDisplay.textContent = 'Error'; nglLinkEl.textContent = 'Gagal memuat link'; inboxIndicator.style.display = 'none'; }
-        }
-
-        function updateUnreadIndicator(count) {
-             if (count > 0) { unreadBadge.textContent = count > 99 ? '99+' : count; inboxIndicator.classList.add('has-unread'); inboxIndicator.style.display = 'flex'; }
-             else { inboxIndicator.classList.remove('has-unread'); inboxIndicator.style.display = 'flex'; }
-        }
-
-        async function markMessageAsRead(messageId) {
-            const messageItem = messageList.querySelector(`.message-item[data-id="${messageId}"]`);
-            if (messageItem && messageItem.classList.contains('unread')) {
-                try { messageItem.classList.remove('unread'); await fetch(`/api/messages/${messageId}/read`, { method: 'PUT' });
-                     const response = await fetch('/api/me'); if (response.ok) { const data = await response.json(); updateUnreadIndicator(data.unreadCount || 0); }
-                 } catch (error) { console.error("Gagal menandai pesan dibaca:", error); if (messageItem) messageItem.classList.add('unread'); }
-            }
-        }
-
-        copyButton.addEventListener('click', () => {
-             const linkToCopy = nglLinkEl.href; if (linkToCopy && linkToCopy !== '#') { navigator.clipboard.writeText(linkToCopy).then(() => { copyStatus.textContent = 'Link disalin!'; copyStatus.className = 'success'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500); }).catch(err => { copyStatus.textContent = 'Gagal menyalin'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); }); }
-             else { copyStatus.textContent = 'Link belum siap'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); }
-         });
-
-        logoutButton.addEventListener('click', async () => {
-            logoutButton.disabled = true; logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...';
-             try { const response = await fetch('/api/logout', { method: 'POST' }); if (response.ok) { window.location.href = '/'; } else { alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; }
-             } catch (error) { alert('Terjadi kesalahan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; }
-         });
-
-        promptForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); const newPrompt = newPromptInput.value.trim(); if (!newPrompt) { promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error'; return; }
-            const sb = promptForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; promptUpdateStatus.textContent = 'Menyimpan...'; promptUpdateStatus.className = 'update-status info';
-            try { const response = await fetch('/api/me/prompt', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt }) }); const result = await response.json();
-                if (response.ok) { promptUpdateStatus.textContent = result.message || 'Prompt diperbarui!'; promptUpdateStatus.className = 'update-status success'; currentPromptDisplay.textContent = result.newPrompt; }
-                else { promptUpdateStatus.textContent = result.message || 'Gagal memperbarui.'; promptUpdateStatus.className = 'update-status error'; }
-            } catch(error) { promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error'; }
-            finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-save"></i> Simpan'; setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000); }
-        });
-
-        avatarForm.addEventListener('submit', async (e) => {
-             e.preventDefault(); const file = avatarFile.files[0]; if (!file) { avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error'; return; }
-             const sb = avatarForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; avatarUpdateStatus.textContent = 'Mengupload...'; avatarUpdateStatus.className = 'update-status info'; const formData = new FormData(); formData.append('avatar', file);
-             try { const response = await fetch('/api/me/avatar', { method: 'POST', body: formData }); const result = await response.json();
-                 if (response.ok) { avatarUpdateStatus.textContent = 'Avatar diperbarui!'; avatarUpdateStatus.className = 'update-status success'; userAvatarInbox.src = result.newAvatarUrl; avatarFile.value = null; }
-                 else { avatarUpdateStatus.textContent = result.message || 'Gagal upload.'; avatarUpdateStatus.className = 'update-status error'; }
-             } catch(error) { avatarUpdateStatus.textContent = 'Error upload.'; avatarUpdateStatus.className = 'update-status error'; }
-             finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-upload"></i> Upload'; setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000); }
-         });
-
-        function drawTextWithWrapping(context, text, x, y, maxWidth, lineHeight, maxHeight) {
-            const words = text.split(' '); let line = ''; let currentY = y; context.textBaseline = 'top';
-            for (let n = 0; n < words.length; n++) {
-                const testLine = line + words[n] + ' '; const metrics = context.measureText(testLine); const testWidth = metrics.width;
-                if (testWidth > maxWidth && n > 0) {
-                    if (maxHeight && currentY + lineHeight * 2 > y + maxHeight) { let trimmedLine = line.trim(); while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) { trimmedLine = trimmedLine.slice(0, -1); } context.fillText(trimmedLine + '...', x, currentY); return currentY + lineHeight; }
-                    context.fillText(line.trim(), x, currentY); line = words[n] + ' '; currentY += lineHeight;
-                } else { line = testLine; }
-            }
-            if (!maxHeight || (currentY + lineHeight <= y + maxHeight)) { context.fillText(line.trim(), x, currentY); currentY += lineHeight; }
-            else if (maxHeight && line.trim().length > 0) { let trimmedLine = line.trim(); while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) { trimmedLine = trimmedLine.slice(0, -1); } context.fillText(trimmedLine + '...', x, currentY - lineHeight); }
-            return currentY;
-        }
-
-        async function generateAndDownloadImage() {
-            const originalMsg = currentMessageContent; const replyMsg = modalReplyText.value.trim(); const username = loggedInUsername || "Anda";
-            if (!replyMsg) { downloadStatus.textContent = 'Balasan tidak boleh kosong.'; downloadStatus.className = 'error'; setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 3000); return; }
-            downloadStatus.textContent = 'Membuat gambar...'; downloadStatus.className = 'info'; downloadButton.disabled = true;
-            try {
-                const canvas = document.createElement('canvas'); const canvasWidth = 540; const canvasHeight = 960; canvas.width = canvasWidth; canvas.height = canvasHeight;
-                const ctx = canvas.getContext('2d'); const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight); gradient.addColorStop(0, '#f8b195'); gradient.addColorStop(0.5, '#f67280'); gradient.addColorStop(1, '#c06c84');
-                ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvasWidth, canvasHeight); const padding = 40; const textMaxWidth = canvasWidth - 2 * padding; let currentY = padding + 20;
-                ctx.font = 'italic 18px sans-serif'; ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; ctx.fillText('Anonim bilang:', padding, currentY); currentY += 30;
-                ctx.font = 'normal 24px sans-serif'; ctx.fillStyle = '#ffffff'; const anonMaxHeight = canvasHeight * 0.35;
-                currentY = drawTextWithWrapping(ctx, originalMsg, padding, currentY, textMaxWidth, 32, anonMaxHeight); currentY += 35;
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(padding, currentY); ctx.lineTo(canvasWidth - padding, currentY); ctx.stroke(); currentY += 35;
-                ctx.font = 'bold 18px sans-serif'; ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillText(`Balasan @${username}:`, padding, currentY); currentY += 30;
-                ctx.font = 'normal 24px sans-serif'; ctx.fillStyle = '#ffffff'; const replyMaxHeight = canvasHeight - currentY - padding - 40;
-                currentY = drawTextWithWrapping(ctx, replyMsg, padding, currentY, textMaxWidth, 32, replyMaxHeight);
-                ctx.font = '14px sans-serif'; ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; ctx.textAlign = 'center'; ctx.fillText(`ngl.clone.app/${username}`, canvasWidth / 2, canvasHeight - padding + 5); ctx.textAlign = 'left';
-                const dataUrl = canvas.toDataURL('image/png'); const link = document.createElement('a'); link.href = dataUrl; link.download = `ngl_reply_${Date.now()}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                downloadStatus.textContent = 'Gambar diunduh!'; downloadStatus.className = 'success'; modalReplyText.value = ''; setTimeout(() => { hideModal(); }, 1500);
-            } catch (error) { console.error("Error generating image:", error); downloadStatus.textContent = 'Gagal membuat gambar.'; downloadStatus.className = 'error'; }
-            finally { downloadButton.disabled = false; setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 4000); }
-        }
-
-        function showModal(originalMessage, messageId) {
-            currentMessageContent = originalMessage; currentMessageId = messageId; modalOriginalMessage.textContent = originalMessage; modalReplyText.value = ''; downloadStatus.textContent = ''; downloadStatus.className = ''; modalOverlay.style.display = 'flex';
-            setTimeout(() => { modalOverlay.classList.add('show'); modalReplyText.focus(); }, 10); markMessageAsRead(messageId);
-        }
-
+        async function fetchMessages() { try { const response = await fetch('/api/my-messages'); if (!response.ok) { if (response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal memuat pesan'); } const messages = await response.json(); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = ''; if (messages.length === 0) { displayNoMessages(); } else { messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); }); } } catch (error) { console.error(error); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan.</li>'; } }
+        async function fetchUserInfo() { try { const response = await fetch('/api/me'); if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal mengambil info user'); } const userData = await response.json(); loggedInUsername = userData.username; usernameDisplayInbox.textContent = userData.username; currentPromptDisplay.textContent = userData.prompt || '-'; userAvatarInbox.src = userData.profilePictureUrl || "https://via.placeholder.com/60"; newPromptInput.value = userData.prompt || ''; const fullLink = `${window.location.origin}/ngl/${userData.username}`; nglLinkEl.textContent = fullLink; nglLinkEl.href = fullLink; updateUnreadIndicator(userData.unreadCount || 0); modalUsernameDisplay.textContent = `@${loggedInUsername}`; } catch (error) { console.error(error); usernameDisplayInbox.textContent = 'Error'; currentPromptDisplay.textContent = 'Error'; nglLinkEl.textContent = 'Gagal memuat link'; inboxIndicator.style.display = 'none'; } }
+        function updateUnreadIndicator(count) { if (count > 0) { unreadBadge.textContent = count > 99 ? '99+' : count; inboxIndicator.classList.add('has-unread'); inboxIndicator.style.display = 'flex'; } else { inboxIndicator.classList.remove('has-unread'); inboxIndicator.style.display = 'flex'; } }
+        async function markMessageAsRead(messageId) { const messageItem = messageList.querySelector(`.message-item[data-id="${messageId}"]`); if (messageItem && messageItem.classList.contains('unread')) { try { messageItem.classList.remove('unread'); await fetch(`/api/messages/${messageId}/read`, { method: 'PUT' }); const response = await fetch('/api/me'); if (response.ok) { const data = await response.json(); updateUnreadIndicator(data.unreadCount || 0); } } catch (error) { console.error("Gagal menandai pesan dibaca:", error); if (messageItem) messageItem.classList.add('unread'); } } }
+        copyButton.addEventListener('click', () => { const linkToCopy = nglLinkEl.href; if (linkToCopy && linkToCopy !== '#') { navigator.clipboard.writeText(linkToCopy).then(() => { copyStatus.textContent = 'Link disalin!'; copyStatus.className = 'success'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500); }).catch(err => { copyStatus.textContent = 'Gagal menyalin'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); }); } else { copyStatus.textContent = 'Link belum siap'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); } });
+        logoutButton.addEventListener('click', async () => { logoutButton.disabled = true; logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...'; try { const response = await fetch('/api/logout', { method: 'POST' }); if (response.ok) { window.location.href = '/'; } else { alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; } } catch (error) { alert('Terjadi kesalahan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; } });
+        promptForm.addEventListener('submit', async (e) => { e.preventDefault(); const newPrompt = newPromptInput.value.trim(); if (!newPrompt) { promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error'; return; } const sb = promptForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; promptUpdateStatus.textContent = 'Menyimpan...'; promptUpdateStatus.className = 'update-status info'; try { const response = await fetch('/api/me/prompt', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt }) }); const result = await response.json(); if (response.ok) { promptUpdateStatus.textContent = result.message || 'Prompt diperbarui!'; promptUpdateStatus.className = 'update-status success'; currentPromptDisplay.textContent = result.newPrompt; } else { promptUpdateStatus.textContent = result.message || 'Gagal memperbarui.'; promptUpdateStatus.className = 'update-status error'; } } catch(error) { promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error'; } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-save"></i> Simpan'; setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000); } });
+        avatarForm.addEventListener('submit', async (e) => { e.preventDefault(); const file = avatarFile.files[0]; if (!file) { avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error'; return; } const sb = avatarForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; avatarUpdateStatus.textContent = 'Mengupload...'; avatarUpdateStatus.className = 'update-status info'; const formData = new FormData(); formData.append('avatar', file); try { const response = await fetch('/api/me/avatar', { method: 'POST', body: formData }); const result = await response.json(); if (response.ok) { avatarUpdateStatus.textContent = 'Avatar diperbarui!'; avatarUpdateStatus.className = 'update-status success'; userAvatarInbox.src = result.newAvatarUrl; avatarFile.value = null; } else { avatarUpdateStatus.textContent = result.message || 'Gagal upload.'; avatarUpdateStatus.className = 'update-status error'; } } catch(error) { avatarUpdateStatus.textContent = 'Error upload.'; avatarUpdateStatus.className = 'update-status error'; } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-upload"></i> Upload'; setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000); } });
+        function drawTextWithWrapping(context, text, x, y, maxWidth, lineHeight, maxHeight) { const words = text.split(' '); let line = ''; let currentY = y; context.textBaseline = 'top'; for (let n = 0; n < words.length; n++) { const testLine = line + words[n] + ' '; const metrics = context.measureText(testLine); const testWidth = metrics.width; if (testWidth > maxWidth && n > 0) { if (maxHeight && currentY + lineHeight * 2 > y + maxHeight) { let trimmedLine = line.trim(); while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) { trimmedLine = trimmedLine.slice(0, -1); } context.fillText(trimmedLine + '...', x, currentY); return currentY + lineHeight; } context.fillText(line.trim(), x, currentY); line = words[n] + ' '; currentY += lineHeight; } else { line = testLine; } } if (!maxHeight || (currentY + lineHeight <= y + maxHeight)) { context.fillText(line.trim(), x, currentY); currentY += lineHeight; } else if (maxHeight && line.trim().length > 0) { let trimmedLine = line.trim(); while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) { trimmedLine = trimmedLine.slice(0, -1); } context.fillText(trimmedLine + '...', x, currentY - lineHeight); } return currentY; }
+        async function generateAndDownloadImage() { const originalMsg = currentMessageContent; const replyMsg = modalReplyText.value.trim(); const username = loggedInUsername || "Anda"; if (!replyMsg || !selectedTheme) { downloadStatus.textContent = 'Balasan dan tema harus dipilih.'; downloadStatus.className = 'error'; setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 3000); return; } downloadStatus.textContent = 'Membuat gambar...'; downloadStatus.className = 'info'; downloadButton.disabled = true; try { const canvas = document.createElement('canvas'); const canvasWidth = 540; const canvasHeight = 960; canvas.width = canvasWidth; canvas.height = canvasHeight; const ctx = canvas.getContext('2d'); if (selectedTheme.type === 'gradient') { const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight); let step = 1 / (selectedTheme.colors.length - 1); if (selectedTheme.colors.length === 1) step = 1; selectedTheme.colors.forEach((color, index) => gradient.addColorStop(Math.min(index * step, 1), color)); ctx.fillStyle = gradient; } else { ctx.fillStyle = selectedTheme.colors[0]; } ctx.fillRect(0, 0, canvasWidth, canvasHeight); const padding = 40; const textMaxWidth = canvasWidth - 2 * padding; let currentY = padding + 20; ctx.font = 'italic 18px sans-serif'; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(50,50,50,0.7)' : 'rgba(0, 0, 0, 0.6)'; ctx.fillText('Anonim bilang:', padding, currentY); currentY += 30; ctx.font = `${selectedTheme.fontWeight || 'normal'} 24px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.fontColor || '#ffffff'; const anonMaxHeight = canvasHeight * 0.35; currentY = drawTextWithWrapping(ctx, originalMsg, padding, currentY, textMaxWidth, 32, anonMaxHeight); currentY += 35; ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(padding, currentY); ctx.lineTo(canvasWidth - padding, currentY); ctx.stroke(); currentY += 35; ctx.font = `bold 18px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(30,30,30,0.8)' : 'rgba(0, 0, 0, 0.7)'; ctx.fillText(`Balasan @${username}:`, padding, currentY); currentY += 30; ctx.font = `${selectedTheme.fontWeight || 'normal'} 24px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.fontColor || '#ffffff'; const replyMaxHeight = canvasHeight - currentY - padding - 40; currentY = drawTextWithWrapping(ctx, replyMsg, padding, currentY, textMaxWidth, 32, replyMaxHeight); ctx.font = `14px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(100,100,100,0.8)' : 'rgba(255, 255, 255, 0.7)'; ctx.textAlign = 'center'; ctx.fillText(`ngl.clone.app/${username}`, canvasWidth / 2, canvasHeight - padding + 5); ctx.textAlign = 'left'; const dataUrl = canvas.toDataURL('image/png'); const link = document.createElement('a'); link.href = dataUrl; link.download = `ngl_reply_${Date.now()}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link); downloadStatus.textContent = 'Gambar diunduh!'; downloadStatus.className = 'success'; modalReplyText.value = ''; setTimeout(() => { hideModal(); }, 1500); } catch (error) { console.error("Error generating image:", error); downloadStatus.textContent = 'Gagal membuat gambar.'; downloadStatus.className = 'error'; } finally { downloadButton.disabled = false; setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 4000); } }
+        function showModal(originalMessage, messageId) { currentMessageContent = originalMessage; currentMessageId = messageId; modalOriginalMessage.textContent = originalMessage; modalReplyText.value = ''; downloadStatus.textContent = ''; downloadStatus.className = ''; const firstThemeRadio = themeOptionsContainer.querySelector('input[type="radio"]'); if (firstThemeRadio) { firstThemeRadio.checked = true; selectedTheme = replyThemes.find(t => t.id === firstThemeRadio.value); } else { selectedTheme = null; } downloadButton.disabled = true; modalOverlay.style.display = 'flex'; setTimeout(() => { modalOverlay.classList.add('show'); modalReplyText.focus(); }, 10); markMessageAsRead(messageId); }
         function hideModal() { modalOverlay.classList.remove('show'); setTimeout(() => { modalOverlay.style.display = 'none'; currentMessageId = null; currentMessageContent = ''; }, 300); }
-
-        messageList.addEventListener('click', (e) => {
-            const targetButton = e.target.closest('.share-reply-button'); const targetItem = e.target.closest('.message-item.clickable-message'); let messageItemElement = null;
-            if (targetButton) { messageItemElement = targetButton.closest('.message-item'); } else if (targetItem) { messageItemElement = targetItem; }
-            if (messageItemElement && messageItemElement.dataset.content && messageItemElement.dataset.id) { showModal(messageItemElement.dataset.content, messageItemElement.dataset.id); }
-        });
-
+        messageList.addEventListener('click', (e) => { const targetButton = e.target.closest('.share-reply-button'); const targetItem = e.target.closest('.message-item.clickable-message'); let messageItemElement = null; if (targetButton) { messageItemElement = targetButton.closest('.message-item'); } else if (targetItem) { messageItemElement = targetItem; } if (messageItemElement && messageItemElement.dataset.content && messageItemElement.dataset.id) { showModal(messageItemElement.dataset.content, messageItemElement.dataset.id); } });
         closeModalButton.addEventListener('click', hideModal);
         modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) { hideModal(); } });
         downloadButton.addEventListener('click', generateAndDownloadImage);
-
-        inboxIndicator.addEventListener('click', (e) => {
-            e.preventDefault(); const isHidden = inboxContentArea.style.display === 'none'; inboxContentArea.style.display = isHidden ? 'block' : 'none'; inboxIndicator.classList.toggle('active', isHidden);
-            if (isHidden && window.innerWidth < 700) { inboxContentArea.scrollIntoView({ behavior: 'smooth' }); }
-        });
-
-        deleteAllButton.addEventListener('click', async () => {
-            if (!confirm('Apakah Anda yakin ingin menghapus SEMUA pesan di inbox Anda? Tindakan ini tidak dapat dibatalkan.')) { return; }
-            deleteAllStatus.textContent = 'Menghapus...'; deleteAllStatus.className = 'update-status info'; deleteAllButton.disabled = true; deleteAllButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-            try {
-                const response = await fetch('/api/my-messages/all', { method: 'DELETE' }); const result = await response.json();
-                if (response.ok) { deleteAllStatus.textContent = result.message || 'Semua pesan berhasil dihapus.'; deleteAllStatus.className = 'update-status success'; messageList.innerHTML = ''; displayNoMessages(); updateUnreadIndicator(0); }
-                else { deleteAllStatus.textContent = result.message || 'Gagal menghapus pesan.'; deleteAllStatus.className = 'update-status error'; }
-            } catch (error) { console.error("Error deleting all messages:", error); deleteAllStatus.textContent = 'Terjadi kesalahan jaringan.'; deleteAllStatus.className = 'update-status error'; }
-            finally { deleteAllButton.disabled = false; deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Pesan'; setTimeout(() => { deleteAllStatus.textContent = ''; deleteAllStatus.className = 'update-status'; }, 5000); }
-        });
+        modalReplyText.addEventListener('input', () => { downloadButton.disabled = !modalReplyText.value.trim() || !selectedTheme; }); // Enable/disable based on text and theme
+        inboxIndicator.addEventListener('click', (e) => { e.preventDefault(); const isHidden = inboxContentArea.style.display === 'none'; inboxContentArea.style.display = isHidden ? 'block' : 'none'; inboxIndicator.classList.toggle('active', isHidden); if (isHidden && window.innerWidth < 700) { inboxContentArea.scrollIntoView({ behavior: 'smooth' }); } });
+        deleteAllButton.addEventListener('click', async () => { if (!confirm('Apakah Anda yakin ingin menghapus SEMUA pesan di inbox Anda? Tindakan ini tidak dapat dibatalkan.')) { return; } deleteAllStatus.textContent = 'Menghapus...'; deleteAllStatus.className = 'update-status info'; deleteAllButton.disabled = true; deleteAllButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...'; try { const response = await fetch('/api/my-messages/all', { method: 'DELETE' }); const result = await response.json(); if (response.ok) { deleteAllStatus.textContent = result.message || 'Semua pesan berhasil dihapus.'; deleteAllStatus.className = 'update-status success'; messageList.innerHTML = ''; displayNoMessages(); updateUnreadIndicator(0); } else { deleteAllStatus.textContent = result.message || 'Gagal menghapus pesan.'; deleteAllStatus.className = 'update-status error'; } } catch (error) { console.error("Error deleting all messages:", error); deleteAllStatus.textContent = 'Terjadi kesalahan jaringan.'; deleteAllStatus.className = 'update-status error'; } finally { deleteAllButton.disabled = false; deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Pesan'; setTimeout(() => { deleteAllStatus.textContent = ''; deleteAllStatus.className = 'update-status'; }, 5000); } });
+        tabsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('tab-button')) { const targetTab = e.target.dataset.tab; tabButtons.forEach(btn => btn.classList.remove('active')); tabContents.forEach(content => content.classList.remove('active')); e.target.classList.add('active'); document.getElementById(targetTab).classList.add('active'); if (targetTab === 'polling-tab') { fetchMyPolls(); } } });
+        addPollOptionButton.addEventListener('click', () => { const optionInputs = pollOptionsContainer.querySelectorAll('.poll-option-input'); if (optionInputs.length >= 10) return; const newOptionDiv = document.createElement('div'); newOptionDiv.className = 'poll-option-input'; const newInput = document.createElement('input'); newInput.type = 'text'; newInput.name = 'options[]'; newInput.placeholder = `Opsi ${optionInputs.length + 1}`; newInput.required = true; newInput.maxLength = 100; const removeButton = document.createElement('button'); removeButton.type = 'button'; removeButton.innerHTML = '<i class="fas fa-times"></i>'; removeButton.addEventListener('click', () => newOptionDiv.remove()); newOptionDiv.appendChild(newInput); newOptionDiv.appendChild(removeButton); pollOptionsContainer.appendChild(newOptionDiv); });
+        createPollForm.addEventListener('submit', async (e) => { e.preventDefault(); const question = document.getElementById('poll-question').value.trim(); const optionInputs = pollOptionsContainer.querySelectorAll('input[name="options[]"]'); const options = Array.from(optionInputs).map(input => input.value.trim()).filter(opt => opt.length > 0); if (options.length < 2) { createPollStatus.textContent = 'Polling harus memiliki minimal 2 opsi yang valid.'; createPollStatus.className = 'update-status error'; return; } const submitButton = createPollForm.querySelector('button[type="submit"]'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat...'; createPollStatus.textContent = 'Membuat polling...'; createPollStatus.className = 'update-status info'; try { const response = await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) }); const result = await response.json(); if (response.ok) { createPollStatus.textContent = 'Polling berhasil dibuat!'; createPollStatus.className = 'update-status success'; createPollForm.reset(); pollOptionsContainer.innerHTML = '<div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 1" required maxlength="100"></div><div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 2" required maxlength="100"></div>'; fetchMyPolls(); } else { createPollStatus.textContent = result.message || 'Gagal membuat polling.'; createPollStatus.className = 'update-status error'; } } catch (error) { console.error("Create poll error:", error); createPollStatus.textContent = 'Terjadi kesalahan jaringan.'; createPollStatus.className = 'update-status error'; } finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-check"></i> Buat Polling'; setTimeout(() => { createPollStatus.textContent = ''; createPollStatus.className = 'update-status'; }, 4000); } });
+        async function fetchMyPolls() { myPollsList.innerHTML = '<li id="loading-polls-placeholder">Memuat polling...</li>'; try { const response = await fetch('/api/my-polls'); if (!response.ok) { throw new Error('Gagal memuat polling'); } const polls = await response.json(); const loadingPollsLi = myPollsList.querySelector('#loading-polls-placeholder'); if (loadingPollsLi) loadingPollsLi.remove(); myPollsList.innerHTML = ''; if (polls.length === 0) { myPollsList.innerHTML = '<li>Anda belum membuat polling.</li>'; } else { polls.forEach(poll => myPollsList.appendChild(renderPollItem(poll))); } } catch (error) { console.error(error); const loadingPollsLi = myPollsList.querySelector('#loading-polls-placeholder'); if (loadingPollsLi) loadingPollsLi.remove(); myPollsList.innerHTML = '<li>Gagal memuat polling.</li>'; } }
+        function renderPollItem(poll) { const li = document.createElement('li'); li.className = 'poll-item'; li.dataset.pollId = poll._id; const questionDiv = document.createElement('div'); questionDiv.className = 'poll-item-question'; questionDiv.textContent = poll.question; const optionsUl = document.createElement('ul'); optionsUl.className = 'poll-item-options'; let totalVotes = 0; poll.options.forEach(opt => totalVotes += opt.votes); poll.options.forEach(opt => { const optLi = document.createElement('li'); const textSpan = document.createElement('span'); textSpan.className = 'poll-option-text'; textSpan.textContent = opt.text; const votesSpan = document.createElement('span'); votesSpan.className = 'poll-option-votes'; const percentage = totalVotes > 0 ? ((opt.votes / totalVotes) * 100).toFixed(1) : 0; votesSpan.textContent = `(${opt.votes} suara, ${percentage}%)`; const barContainer = document.createElement('div'); barContainer.className = 'poll-option-bar-container'; const bar = document.createElement('div'); bar.className = 'poll-option-bar'; bar.style.width = `${percentage}%`; barContainer.appendChild(bar); optLi.appendChild(textSpan); optLi.appendChild(votesSpan); optLi.appendChild(barContainer); optionsUl.appendChild(optLi); }); const actionsDiv = document.createElement('div'); actionsDiv.className = 'poll-item-actions'; const statusSpan = document.createElement('span'); statusSpan.className = 'poll-item-status'; statusSpan.textContent = poll.isActive ? 'Aktif' : 'Nonaktif'; const toggleButton = document.createElement('button'); toggleButton.innerHTML = poll.isActive ? '<i class="fas fa-toggle-off"></i> Nonaktifkan' : '<i class="fas fa-toggle-on"></i> Aktifkan'; toggleButton.onclick = () => togglePollStatus(poll._id, !poll.isActive); const deleteButton = document.createElement('button'); deleteButton.className = 'danger-button'; deleteButton.innerHTML = '<i class="fas fa-trash"></i> Hapus'; deleteButton.onclick = () => deletePoll(poll._id); actionsDiv.appendChild(statusSpan); actionsDiv.appendChild(toggleButton); actionsDiv.appendChild(deleteButton); li.appendChild(questionDiv); li.appendChild(optionsUl); li.appendChild(actionsDiv); return li; }
+        async function togglePollStatus(pollId, newStatus) { try { const response = await fetch(`/api/polls/${pollId}/toggle`, { method: 'PUT' }); if (response.ok) { fetchMyPolls(); } else { alert('Gagal mengubah status polling.'); } } catch (error) { alert('Terjadi kesalahan jaringan.'); } }
+        async function deletePoll(pollId) { if (!confirm('Apakah Anda yakin ingin menghapus polling ini?')) return; try { const response = await fetch(`/api/polls/${pollId}`, { method: 'DELETE' }); if (response.ok) { fetchMyPolls(); } else { alert('Gagal menghapus polling.'); } } catch (error) { alert('Terjadi kesalahan jaringan.'); } }
+        function startUserTourIfNew() { const urlParams = new URLSearchParams(window.location.search); if (urlParams.has('tour')) { const newUrl = window.location.pathname; window.history.replaceState({}, document.title, newUrl); setTimeout(() => { const linkSection = document.querySelector('#ngl-link-section'); const copyBtn = document.querySelector('#copy-link-button'); const inboxArea = document.querySelector('#inbox-content-area'); const promptFormEl = document.querySelector('#prompt-form'); const avatarFormEl = document.querySelector('#avatar-form'); const deleteAllBtn = document.querySelector('#delete-all-messages-button'); const inboxIcon = document.querySelector('#inbox-indicator'); const pollingTabBtn = document.querySelector('.tab-button[data-tab="polling-tab"]'); if (linkSection && copyBtn && inboxArea && promptFormEl && avatarFormEl && deleteAllBtn && inboxIcon && pollingTabBtn) { introJs().setOptions({ steps: [ { element: linkSection, intro: "Selamat datang! Ini link unik NGL Anda. Salin dan bagikan!" }, { element: copyBtn, intro: "Gunakan tombol ini untuk menyalin link.", position: 'bottom' }, { element: inboxIcon, intro: "Klik ikon ini untuk membuka atau menutup daftar pesan masuk Anda."}, { onbeforechange: function(targetElement) { inboxContentArea.style.display = 'block'; inboxIndicator.classList.add('active'); document.querySelector('.tab-button[data-tab="inbox-tab"]').classList.add('active'); document.querySelector('.tab-button[data-tab="polling-tab"]').classList.remove('active'); document.getElementById('inbox-tab').classList.add('active'); document.getElementById('polling-tab').classList.remove('active'); }, element: inboxArea, intro: "Pesan anonim yang masuk akan muncul di area ini." }, { element: promptFormEl, intro: "Ubah prompt yang tampil di profil Anda di sini." }, { element: avatarFormEl, intro: "Upload foto profil Anda." }, { element: pollingTabBtn, intro: "Anda juga bisa membuat polling anonim di tab ini!" }, { element: deleteAllBtn, intro: "Tombol ini untuk menghapus semua pesan sekaligus." } ], showProgress: true, showBullets: false, exitOnOverlayClick: false, }).start(); } else { console.warn("Elemen tour tidak ditemukan."); } }, 500); } }
 
         const socket = io({ autoConnect: true });
-        socket.on('connect', () => { });
-        socket.on('disconnect', (reason) => { });
-        socket.on('connect_error', (err) => { if (err.message === 'Authentication required' || err.message === 'Unauthorized') { setTimeout(() => { window.location.href = '/'; }, 2000); } });
+        socket.on('connect', () => { }); socket.on('disconnect', (reason) => { }); socket.on('connect_error', (err) => { if (err.message === 'Authentication required' || err.message === 'Unauthorized') { setTimeout(() => { window.location.href = '/'; }, 2000); } });
         socket.on('new_message', (newMessage) => { const messageItem = renderMessage(newMessage); const noMessagesLi = messageList.querySelector('#no-messages-placeholder'); const loadingLi = messageList.querySelector('#loading-placeholder'); if (noMessagesLi) { noMessagesLi.remove(); } if (loadingLi) { loadingLi.remove(); } messageList.insertBefore(messageItem, messageList.firstChild); fetchUserInfo(); });
         socket.on('update_unread_count', (data) => { updateUnreadIndicator(data.unreadCount || 0); });
         socket.on('messages_cleared', () => { messageList.innerHTML = ''; displayNoMessages(); });
 
-        fetchUserInfo();
-        fetchMessages();
+        Promise.all([fetchUserInfo(), fetchMessages()]).then(() => { startUserTourIfNew(); });
     </script>
 </body>
 </html>
