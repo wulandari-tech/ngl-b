@@ -3,8 +3,8 @@ const router = express.Router();
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
-const User = require('../models/user');
-const Message = require('../models/message');
+const User = require('../models/User');
+const Message = require('../models/Message');
 const { sendPasswordResetEmail } = require('../utils/mailer');
 const upload = require('../middleware/multer');
 const cloudinary = require('../config/cloudinary');
@@ -96,7 +96,7 @@ router.post('/logout', (req, res, next) => {
             if (userId) {
                  removeUserSocket(userId);
             }
-            res.clearCookie('connect.sid'); // Sesuaikan nama cookie jika berbeda
+            res.clearCookie('connect.sid');
             res.json({ message: 'Logout berhasil!' });
         });
     });
@@ -114,7 +114,7 @@ router.post('/forgot-password', async (req, res) => {
             return res.json({ message: 'Jika akun terdaftar dengan email yang valid, link reset akan dikirim.' });
         }
 
-        const userEmailToSendTo = user.email || user.username; // Sesuaikan logika ini jika perlu
+        const userEmailToSendTo = user.email || user.username;
         if (!userEmailToSendTo || !/\S+@\S+\.\S+/.test(userEmailToSendTo)) {
              console.log(`Percobaan reset password untuk user ${user.username} tanpa email valid.`);
              return res.json({ message: 'Jika akun terdaftar dengan email yang valid, link reset akan dikirim.' });
@@ -333,6 +333,34 @@ router.put('/messages/:messageId/read', ensureAuthenticated, async (req, res) =>
             return res.status(400).json({ message: 'Format ID pesan tidak valid.' });
         }
         res.status(500).json({ message: 'Gagal menandai pesan dibaca.' });
+    }
+});
+
+router.delete('/my-messages/all', ensureAuthenticated, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const deleteResult = await Message.deleteMany({ recipient: userId });
+
+        console.log(`Dihapus ${deleteResult.deletedCount} pesan untuk user ${userId}`);
+
+        const io = req.app.get('socketio');
+        const userSocketId = findSocketIdByUserId(req.user._id.toString());
+        if (io && userSocketId) {
+             try {
+                io.to(userSocketId).emit('update_unread_count', { unreadCount: 0 });
+                io.to(userSocketId).emit('messages_cleared');
+             } catch(socketError) {
+                console.error("Error emitting socket event after delete all:", socketError);
+             }
+         }
+
+        res.status(200).json({
+            message: `Berhasil menghapus ${deleteResult.deletedCount} pesan.`
+        });
+
+    } catch (error) {
+        console.error("Delete all messages error:", error);
+        res.status(500).json({ message: 'Gagal menghapus semua pesan.' });
     }
 });
 
