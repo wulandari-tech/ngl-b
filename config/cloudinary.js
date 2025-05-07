@@ -1,21 +1,14 @@
-const cloudinary = require('cloudinary').v2;
-require('dotenv').config(); // Ensure environment variables are loaded
+// config/cloudinary.js (Contoh)
+const cloudinary = require('cloudinary'); // Impor library Cloudinary
+require('dotenv').config(); // Pastikan variabel environment dimuat
 
-if (
-    !process.env.CLOUDINARY_CLOUD_NAME ||
-    !process.env.CLOUDINARY_API_KEY ||
-    !process.env.CLOUDINARY_API_SECRET
-) {
-    console.error('Error: Cloudinary environment variables (CLOUD_NAME, API_KEY, API_SECRET) are missing!');
-    // Optionally exit or throw an error to prevent the app from running without config
-    // process.exit(1);
-}
-
-cloudinary.config({
+// Konfigurasi Cloudinary menggunakan environment variables
+cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true // Use https URLs
+    secure: true // Optional: Selalu gunakan HTTPS untuk URL
 });
 
+// --- PENTING: Ekspor objek cloudinary ---
 module.exports = cloudinary;

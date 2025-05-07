@@ -8,49 +8,44 @@ const rateLimit = require('express-rate-limit');
 const User = require('../models/user');
 const Message = require('../models/message');
 const Poll = require('../models/poll');
-const { sendPasswordResetEmail } = require('../utils/mailer'); // Pastikan path ini benar
-const upload = require('../middleware/multer'); // Middleware multer Anda untuk avatar
-const cloudinary = require('../config/cloudinary').v2; // Pastikan .v2 jika menggunakan API v2
-const dataUri = require('../utils/datauri'); // Utility dataUri Anda
-
-// Impor Story Routes
-const storyRoutes = require('./storyRoutes'); // Pastikan path ini benar relatif terhadap api.js
+const { sendPasswordResetEmail } = require('../utils/mailer');
+const upload = require('../middleware/multer');
+const cloudinaryBase = require('../config/cloudinary'); // Impor base object
+const cloudinary = cloudinaryBase.v2; // Akses v2 API
+const dataUri = require('../utils/datauri');
+const storyRoutes = require('./storyRoutes');
 
 const userSockets = new Map();
 
 const addUserSocket = (userId, socketId) => {
     userSockets.set(userId, socketId);
-    // console.log(`Peta Soket Diperbarui: User ${userId} -> Soket ${socketId}`);
 };
 const removeUserSocket = (userId) => {
     if (userSockets.has(userId)) {
         userSockets.delete(userId);
-        // console.log(`Peta Soket Diperbarui: User ${userId} dihapus.`);
     }
 };
 const findSocketIdByUserId = (userId) => {
     return userSockets.get(userId);
 };
 const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated && req.isAuthenticated()) {
         return next();
     }
     res.status(401).json({ message: 'Autentikasi diperlukan' });
 };
 
 const messageLimiter = rateLimit({
-	windowMs: 2 * 60 * 60 * 1000, // 2 jam
-	max: 10, // Batas 10 permintaan per windowMs per IP
+	windowMs: 2 * 60 * 60 * 1000,
+	max: 10,
 	message: { message: 'Terlalu banyak percobaan mengirim pesan dari IP ini, silakan coba lagi setelah 2 jam.' },
-	standardHeaders: true, // Mengembalikan info rate limit di header `RateLimit-*`
-	legacyHeaders: false, // Menonaktifkan header `X-RateLimit-*`
+	standardHeaders: true,
+	legacyHeaders: false,
     handler: (req, res, next, options) => {
-        // console.warn(`Rate limit exceeded for IP ${req.ip} on ${req.originalUrl}`);
         res.status(options.statusCode).json(options.message);
     }
 });
 
-// --- Rute Autentikasi ---
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -77,7 +72,7 @@ router.post('/register', async (req, res) => {
             const firstError = Object.values(error.errors)[0].message;
             return res.status(400).json({ message: firstError });
         }
-        if (error.code === 11000) { // Kode error MongoDB untuk duplikat key
+        if (error.code === 11000) {
             return res.status(400).json({ message: 'Username atau Email sudah digunakan.' });
         }
         res.status(500).json({ message: 'Terjadi kesalahan server saat registrasi.' });
@@ -88,7 +83,7 @@ router.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
         if (err) {
             console.error("Login authentication error:", err);
-            return next(err); // Menggunakan next(err) untuk error handler global Express
+            return next(err);
         }
         if (!user) {
             return res.status(401).json({ message: info?.message || 'Username atau password salah.' });
@@ -104,27 +99,22 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/logout', (req, res, next) => {
-    const userId = req.user?._id?.toString(); // Ambil user ID sebelum logout
+    const userId = req.user?._id?.toString();
     req.logout(function(err) {
         if (err) {
-            // console.error("Logout error:", err);
             return next(err);
         }
         req.session.destroy((err) => {
-            if (err) {
-                // console.error("Session destruction error:", err);
-                // Tetap lanjutkan meskipun ada error saat destroy session
-            }
+            // Handle error, but proceed
             if (userId) {
                 removeUserSocket(userId);
             }
-            res.clearCookie('connect.sid'); // Nama cookie default untuk express-session
+            res.clearCookie('connect.sid');
             res.json({ message: 'Logout berhasil!' });
         });
     });
 });
 
-// --- Rute Lupa/Reset Password ---
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     if (!email) {
@@ -133,20 +123,16 @@ router.post('/forgot-password', async (req, res) => {
     try {
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
-            // console.log(`Percobaan reset password untuk email tidak terdaftar: ${email}`);
-            // Selalu kirim respons yang sama untuk menghindari enumerasi email
             return res.json({ message: 'Jika email terdaftar, link reset password telah dikirim.' });
         }
         const token = crypto.randomBytes(20).toString('hex');
         user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 jam
+        user.resetPasswordExpires = Date.now() + 3600000;
         await user.save();
-
         const emailSent = await sendPasswordResetEmail(user.email, token);
         if (emailSent) {
             res.json({ message: 'Jika email terdaftar, link reset password telah dikirim.' });
         } else {
-            // Rollback token jika email gagal dikirim
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
             await user.save();
@@ -161,29 +147,24 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset/:token', async (req, res) => {
     const { token } = req.params;
     const { password, confirmPassword } = req.body;
-
     if (!password || !confirmPassword || password !== confirmPassword) {
         return res.status(400).json({ message: 'Password baru dan konfirmasi harus diisi dan cocok.' });
     }
-    if (password.length < 6) { // Asumsi ada validasi panjang password
+    if (password.length < 6) {
         return res.status(400).json({ message: 'Password minimal harus 6 karakter.' });
     }
-
     try {
         const user = await User.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }
         });
-
         if (!user) {
             return res.status(400).json({ message: 'Token reset password tidak valid atau sudah kedaluwarsa.' });
         }
-
-        user.password = password; // Setter di model User akan menghash password baru
+        user.password = password;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
         await user.save();
-
         res.json({ message: 'Password berhasil direset. Silakan login.' });
     } catch (error) {
         console.error("Reset Password Error:", error);
@@ -191,14 +172,11 @@ router.post('/reset/:token', async (req, res) => {
     }
 });
 
-// --- Rute User yang Login ---
 router.get('/me', ensureAuthenticated, async (req, res) => {
     try {
-        // Dapatkan jumlah pesan yang belum dibaca
         const unreadCount = await Message.countDocuments({ recipient: req.user._id, isRead: false });
-        // Kirim data pengguna termasuk unreadCount
         res.json({
-            _id: req.user._id, // atau req.user.id
+            _id: req.user._id,
             username: req.user.username,
             email: req.user.email,
             prompt: req.user.prompt,
@@ -217,11 +195,10 @@ router.put('/me/prompt', ensureAuthenticated, async (req, res) => {
         return res.status(400).json({ message: 'Prompt diperlukan (1-100 karakter).' });
     }
     try {
-        // Langsung update menggunakan findByIdAndUpdate untuk efisiensi
         const updatedUser = await User.findByIdAndUpdate(
             req.user._id,
             { $set: { prompt: prompt.trim() } },
-            { new: true, runValidators: true } // new: true untuk mendapatkan dokumen yang sudah diupdate
+            { new: true, runValidators: true }
         );
         if (!updatedUser) {
             return res.status(404).json({ message: 'User tidak ditemukan.' });
@@ -237,43 +214,41 @@ router.post('/me/avatar', ensureAuthenticated, upload.single('avatar'), async (r
     if (!req.file) {
         return res.status(400).json({ message: 'Tidak ada file gambar yang diupload.' });
     }
+    // Pastikan cloudinary sudah terdefinisi sebelum blok try
+    if (!cloudinary || !cloudinary.uploader) {
+         console.error("Cloudinary object or uploader is undefined before avatar upload.");
+         return res.status(500).json({ message: 'Konfigurasi Cloudinary bermasalah.' });
+    }
     try {
-        const fileStr = dataUri(req).content; // Mengubah buffer file menjadi data URI string
+        const fileStr = dataUri(req.file).content;
         const user = await User.findById(req.user._id);
         if (!user) {
-            // Seharusnya tidak terjadi jika ensureAuthenticated bekerja
             return res.status(404).json({ message: 'User tidak ditemukan.' });
         }
-
-        // Hapus avatar lama dari Cloudinary jika ada
         if (user.profilePicturePublicId) {
             try {
                 await cloudinary.uploader.destroy(user.profilePicturePublicId);
             } catch (deleteError) {
                 console.warn("Gagal menghapus avatar lama:", deleteError.message);
-                // Lanjutkan meskipun gagal menghapus, agar avatar baru tetap bisa diupload
             }
         }
-
         const result = await cloudinary.uploader.upload(fileStr, {
-            folder: "ngl_avatars", // Nama folder di Cloudinary
-            transformation: [ // Contoh transformasi
-                { width: 150, height: 150, crop: "fill", gravity: "face" }
-            ]
+            folder: "ngl_avatars",
+            transformation: [{ width: 150, height: 150, crop: "fill", gravity: "face" }]
         });
-
         user.profilePictureUrl = result.secure_url;
         user.profilePicturePublicId = result.public_id;
         await user.save();
-
         res.json({ message: 'Avatar berhasil diperbarui!', newAvatarUrl: user.profilePictureUrl });
     } catch (error) {
         console.error("Avatar upload error:", error);
+         if (error.message && error.message.includes("Invalid file object")) {
+             return res.status(400).json({ message: 'Terjadi masalah saat memproses file gambar.' });
+        }
         res.status(500).json({ message: 'Gagal mengupload avatar.' });
     }
 });
 
-// --- Rute Pesan ---
 router.get('/my-messages', ensureAuthenticated, async (req, res) => {
     try {
         const messages = await Message.find({ recipient: req.user._id }).sort({ createdAt: -1 });
@@ -287,31 +262,21 @@ router.get('/my-messages', ensureAuthenticated, async (req, res) => {
 router.post('/messages/:username', messageLimiter, async (req, res) => {
     const { username } = req.params;
     const { content } = req.body;
-
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
         return res.status(400).json({ message: 'Konten pesan tidak boleh kosong.' });
     }
-    if (content.length > 1000) { // Batas panjang pesan
+    if (content.length > 1000) {
         return res.status(400).json({ message: 'Pesan terlalu panjang.' });
     }
-
     try {
         const recipientUser = await User.findOne({ username: username.toLowerCase() });
         if (!recipientUser) {
             return res.status(404).json({ message: 'User penerima tidak ditemukan.' });
         }
-
-        const newMessage = new Message({
-            recipient: recipientUser._id,
-            content: content.trim(),
-            isRead: false // Default
-        });
+        const newMessage = new Message({ recipient: recipientUser._id, content: content.trim(), isRead: false });
         const savedMessage = await newMessage.save();
-
-        // Kirim notifikasi via Socket.IO
         const io = req.app.get('socketio');
         const recipientSocketId = findSocketIdByUserId(recipientUser._id.toString());
-
         if (io && recipientSocketId) {
             try {
                 const unreadCount = await Message.countDocuments({ recipient: recipientUser._id, isRead: false });
@@ -321,7 +286,6 @@ router.post('/messages/:username', messageLimiter, async (req, res) => {
                 console.error("Error emitting socket for new message:", socketError);
             }
         }
-
         res.status(201).json({ message: 'Pesan berhasil dikirim!' });
     } catch (error) {
         console.error("Send message error:", error);
@@ -331,19 +295,14 @@ router.post('/messages/:username', messageLimiter, async (req, res) => {
 
 router.put('/messages/:messageId/read', ensureAuthenticated, async (req, res) => {
     try {
-        // Update pesan dan pastikan hanya user yang benar yang bisa menandainya
         const message = await Message.findOneAndUpdate(
             { _id: req.params.messageId, recipient: req.user._id, isRead: false },
             { $set: { isRead: true } },
-            { new: false } // kembalikan dokumen lama jika perlu info sebelum update, atau true untuk dokumen baru
+            { new: false }
         );
-
         if (!message) {
-            // Pesan tidak ditemukan, sudah dibaca, atau bukan milik user
-            return res.status(204).send(); // No content, atau 404 jika prefer
+            return res.status(204).send();
         }
-
-        // Update unread count untuk user via Socket.IO
         const io = req.app.get('socketio');
         const userSocketId = findSocketIdByUserId(req.user._id.toString());
         if (io && userSocketId) {
@@ -354,10 +313,10 @@ router.put('/messages/:messageId/read', ensureAuthenticated, async (req, res) =>
                 console.error("Error emitting socket for unread count update:", socketError);
             }
         }
-        res.status(204).send(); // Berhasil, tidak ada konten yang dikembalikan
+        res.status(204).send();
     } catch (error) {
         console.error("Mark read error:", error);
-        if (error.kind === 'ObjectId') { // Error jika format ID tidak valid
+        if (error.kind === 'ObjectId') {
             return res.status(400).json({ message: 'Format ID pesan tidak valid.' });
         }
         res.status(500).json({ message: 'Gagal menandai pesan dibaca.' });
@@ -368,8 +327,6 @@ router.delete('/my-messages/all', ensureAuthenticated, async (req, res) => {
     try {
         const userId = req.user._id;
         const deleteResult = await Message.deleteMany({ recipient: userId });
-        // console.log(`Dihapus ${deleteResult.deletedCount} pesan untuk user ${userId}`);
-
         const io = req.app.get('socketio');
         const userSocketId = findSocketIdByUserId(req.user._id.toString());
         if (io && userSocketId) {
@@ -387,25 +344,21 @@ router.delete('/my-messages/all', ensureAuthenticated, async (req, res) => {
     }
 });
 
-
-// --- Rute Polling ---
 router.post('/polls', ensureAuthenticated, async (req, res) => {
     const { question, options } = req.body;
     if (!question || !options || !Array.isArray(options) || options.length < 2) {
         return res.status(400).json({ message: 'Pertanyaan dan minimal 2 opsi diperlukan.' });
     }
     const sanitizedOptions = options
-        .map(opt => ({ text: String(opt || '').trim().substring(0, 100) })) // Pastikan string, trim, batasi panjang
-        .filter(opt => opt.text.length > 0); // Hapus opsi kosong
-
+        .map(opt => ({ text: String(opt || '').trim().substring(0, 100) }))
+        .filter(opt => opt.text.length > 0);
     if (sanitizedOptions.length < 2) {
         return res.status(400).json({ message: 'Minimal 2 opsi yang valid diperlukan.' });
     }
-
     try {
         const newPoll = new Poll({
             creator: req.user._id,
-            question: question.trim().substring(0, 280), // Batasi panjang pertanyaan
+            question: question.trim().substring(0, 280),
             options: sanitizedOptions
         });
         await newPoll.save();
@@ -438,7 +391,7 @@ router.get('/polls/active/:username', async (req, res) => {
         }
         const activePolls = await Poll.find({ creator: user._id, isActive: true })
             .sort({ createdAt: -1 })
-            .select('question options._id options.text _id createdAt isActive'); // Pilih field yang dibutuhkan
+            .select('question options._id options.text _id createdAt isActive');
         res.json(activePolls);
     } catch (error) {
         console.error("Fetch active polls error:", error);
@@ -449,13 +402,11 @@ router.get('/polls/active/:username', async (req, res) => {
 router.post('/polls/:pollId/vote', async (req, res) => {
     const { pollId } = req.params;
     const { optionIndex } = req.body;
-    const ip = req.ip || req.connection?.remoteAddress; // Dapatkan IP Address pemilih
-    const voterIdentifier = ip ? crypto.createHash('sha256').update(ip + (process.env.VOTE_SALT || 'default_salt')).digest('hex') : null; // Buat identifier unik per IP
-
+    const ip = req.ip || req.connection?.remoteAddress;
+    const voterIdentifier = ip ? crypto.createHash('sha256').update(ip + (process.env.VOTE_SALT || 'default_salt')).digest('hex') : null;
     if (optionIndex === undefined || optionIndex === null || !voterIdentifier) {
         return res.status(400).json({ message: 'Opsi tidak valid atau identifier pemilih tidak ditemukan.' });
     }
-
     try {
         const poll = await Poll.findById(pollId);
         if (!poll || !poll.isActive) {
@@ -464,15 +415,12 @@ router.post('/polls/:pollId/vote', async (req, res) => {
         if (optionIndex < 0 || optionIndex >= poll.options.length) {
             return res.status(400).json({ message: 'Opsi yang dipilih tidak valid.' });
         }
-
-        // Cek apakah identifier ini sudah vote
         const alreadyVoted = poll.voters.some(voter => voter.identifier === voterIdentifier);
         if (alreadyVoted) {
             return res.status(403).json({ message: 'Anda sudah memberikan suara untuk polling ini.' });
         }
-
         poll.options[optionIndex].votes += 1;
-        poll.voters.push({ identifier: voterIdentifier }); // Simpan identifier pemilih
+        poll.voters.push({ identifier: voterIdentifier });
         await poll.save();
         res.json({ message: 'Suara berhasil direkam!' });
     } catch (error) {
@@ -518,7 +466,6 @@ router.put('/polls/:pollId/toggle', ensureAuthenticated, async (req, res) => {
     }
 });
 
-// Daftarkan Story Routes
 router.use('/stories', storyRoutes);
 
 module.exports = {
