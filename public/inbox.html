@@ -3,227 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inbox Saya - NGL Clone</title>
+    <title>Dasbor Saya - NGL Clone</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css">
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body{font-family:sans-serif;margin:0;color:#333;line-height:1.6;background:linear-gradient(135deg,#f8b195,#f67280,#c06c84);background-attachment:fixed;padding:20px 0}
-        .container{max-width:700px;margin:20px auto;background:rgba(255,255,255,.98);padding:30px;border-radius:15px;box-shadow:0 8px 30px rgba(0,0,0,.15)}
-        h1{text-align:center;color:#333;margin-top:0;margin-bottom:25px}
-        .profile-info{display:flex;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #eee}
-        .profile-info img{width:60px;height:60px;border-radius:50%;margin-right:15px;object-fit:cover;background-color:#eee;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-        .profile-details p{margin:2px 0;font-size:.95em;color:#444}
-        .profile-details strong{color:#000}
-        .edit-section{margin-top:15px}
+        body{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;margin:0;color:#333;line-height:1.6;background:linear-gradient(135deg,#f8b195,#f67280,#c06c84);background-attachment:fixed;padding:20px 0; font-size: 15px;}
+        .container{max-width:800px;margin:20px auto;background:rgba(255,255,255,.99);padding:25px;border-radius:15px;box-shadow:0 10px 35px rgba(0,0,0,.15)}
+        h1,h2,h3{text-align:center;color:#333;margin-top:0;margin-bottom:25px}
+        h1{font-size:2em;} h2{font-size:1.6em; margin-top:30px;} h3{text-align:left;font-size:1.3em;margin-bottom:18px;color:#444; border-bottom: 1px solid #eee; padding-bottom: 8px;}
+        .profile-info{display:flex;align-items:center;margin-bottom:25px;padding-bottom:25px;border-bottom:1px solid #eee}
+        .profile-info img{width:70px;height:70px;border-radius:50%;margin-right:20px;object-fit:cover;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+        .profile-details p{margin:3px 0;font-size:1em;color:#555}.profile-details strong{color:#222}
         .edit-section form{margin-bottom:20px}
-        .edit-section label{display:block;margin-bottom:6px;font-weight:700;font-size:.9em;color:#555}
-        .edit-section input[type=text]{width:calc(100% - 95px);padding:8px 10px;border-radius:5px;border:1px solid #ccc;margin-right:5px;font-size:.95em}
-        .edit-section input[type=file]{font-size:.9em;margin-bottom:8px;display:block}
-        .edit-section button,.poll-section button{padding:9px 15px;font-size:.9em;background-color:#f67280;color:#fff;border:none;border-radius:20px;cursor:pointer;transition:background-color .2s ease}
-        .edit-section button:hover,.poll-section button:hover{background-color:#c06c84}
-        .edit-section button:disabled,.poll-section button:disabled{background-color:#ccc;cursor:not-allowed}
-        .edit-section button i,.poll-section button i{margin-right:5px}
-        .update-status{margin-top:8px;font-size:.9em;min-height:1.1em}
-        .update-status:empty{display:none}
-        .update-status.success{color:green}
-        .update-status.error{color:red}
-        .update-status.info{color:orange}
-        .ngl-link-section{margin-top:25px}
-        .ngl-link-section p{text-align:center;margin-bottom:5px;color:#555;font-size:.95em}
-        #ngl-link{font-weight:700;word-break:break-all;color:#c06c84;text-decoration:none}
-        #ngl-link:hover{text-decoration:underline}
-        .copy-action{text-align:center;margin-bottom:25px}
-        #copy-link-button{background-color:#f67280;color:#fff;padding:8px 15px;border:none;border-radius:20px;cursor:pointer;font-size:.9em;transition:background-color .2s ease}
-        #copy-link-button i{margin-right:5px}
-        #copy-link-button:hover{background-color:#c06c84}
-        #copy-status{display:inline-block;margin-left:10px;font-size:.9em;font-weight:700}
-        #copy-status:empty{display:none}
-        #copy-status.success{color:green}
-        #copy-status.error{color:red}
-        .tabs{display:flex;border-bottom:1px solid #eee;margin-bottom:20px;margin-top: 25px;}
-        .tab-button{padding:10px 15px;cursor:pointer;border:none;background:none;font-size:1em;color:#777;margin-bottom:-1px;border-bottom:3px solid transparent;}
-        .tab-button.active{color:#f67280;border-bottom:3px solid #f67280;font-weight:bold;}
-        .tab-content{display:none;}
-        .tab-content.active{display:block;}
+        .edit-section label, .story-creation-section > form > label, .poll-section label {display:block;margin-bottom:8px;font-weight:600;font-size:0.95em;color:#555}
+        .edit-section input[type=text], .poll-section input[type=text], .poll-section textarea,
+        .story-creation-section > form > select, .story-creation-section > form > input[type="number"],
+        .story-type-fields input[type="text"], .story-type-fields textarea, .story-type-fields input[type="color"] {
+            width:100%;padding:12px;margin-bottom:12px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box;font-size:1em; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .edit-section input[type=text]:focus, .poll-section input[type=text]:focus, .story-type-fields input[type=text]:focus {border-color:#f67280; box-shadow: 0 0 0 2px rgba(246,114,128,0.2);}
+        .edit-section input[type=file], #story-media-file {font-size:.95em;margin-bottom:10px;display:block; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background-color: #fff; cursor: pointer;}
+        .edit-section div {display: flex; align-items: center; gap: 10px;} .edit-section div input[type=text] {flex-grow: 1;}
+        .edit-section button, .poll-section button, .story-creation-section button[type="submit"], .story-item-actions button {padding:10px 18px;font-size:1em;background-color:#f67280;color:#fff;border:none;border-radius:25px;cursor:pointer;transition:background-color .2s ease, transform .1s ease; font-weight:500;}
+        .edit-section button:hover, .poll-section button:hover, .story-creation-section button[type="submit"]:hover {background-color:#c06c84}
+        .edit-section button:active, .poll-section button:active, .story-creation-section button[type="submit"]:active {transform:scale(0.98)}
+        .edit-section button:disabled, .poll-section button:disabled, .story-creation-section button[type="submit"]:disabled {background-color:#ccc;cursor:not-allowed; transform: none;}
+        .edit-section button i, .poll-section button i, .story-creation-section button i {margin-right:7px}
+        .update-status{text-align:left;margin-top:10px;font-size:.9em;min-height:1.2em; padding: 8px; border-radius: 4px;}.update-status:empty{display:none}
+        .update-status.success{color:#155724;background-color:#d4edda;border:1px solid #c3e6cb}.update-status.error{color:#721c24;background-color:#f8d7da;border:1px solid #f5c6cb}.update-status.info{color:#0c5460;background-color:#d1ecf1;border:1px solid #bee5eb}
+        .ngl-link-section{margin-top:30px;text-align:center; background-color: #fdf6f7; padding: 15px; border-radius: 8px; border: 1px solid #fbe0e3;}.ngl-link-section p{margin-bottom:8px;color:#4a4a4a;font-size:1em}
+        #ngl-link{font-weight:700;word-break:break-all;color:#c06c84;text-decoration:none; font-size: 1.1em;}#ngl-link:hover{text-decoration:underline}
+        .copy-action{text-align:center;margin-bottom:30px}#copy-link-button{background-color:#f67280;color:#fff;padding:10px 20px;border:none;border-radius:25px;cursor:pointer;font-size:1em; font-weight: 500;}
+        #copy-status{display:inline-block;margin-left:12px;font-size:.9em;font-weight:700}#copy-status.success{color:green}
+        .tabs{display:flex;border-bottom:2px solid #eee;margin-bottom:25px;margin-top:30px;}
+        .tab-button{padding:12px 20px;cursor:pointer;border:none;background:none;font-size:1.05em;color:#777;margin-bottom:-2px;border-bottom:3px solid transparent; transition: color 0.2s ease, border-color 0.2s ease; font-weight: 500;}
+        .tab-button:hover {color: #f67280;}
+        .tab-button.active{color:#f67280;border-bottom:3px solid #f67280;font-weight:600;}
+        .tab-button i {margin-right: 8px;}
+        .tab-content{display:none; animation: fadeIn 0.5s ease;}.tab-content.active{display:block;} @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
         #inbox-content-area{margin-top:0;padding-top:0;border-top:none;}
         .message-list{list-style:none;padding:0;margin:0}
-        .message-list li#loading-placeholder,.message-list li#no-messages-placeholder{text-align:center;color:#777;padding:20px;font-style:italic}
-        .message-item{background:#fff;border:1px solid #eee;padding:15px 20px;margin-bottom:15px;border-radius:10px;border-left:5px solid #f8b195;position:relative;box-shadow:0 2px 5px rgba(0,0,0,.05);transition:background-color .2s ease}
-        .message-item p{margin:0 0 8px;word-wrap:break-word;font-size:1.05em;color:#444}
-        .message-time{font-size:.8em;color:#888;display:block}
-        .share-reply-button{background-color:#6c757d;color:#fff;padding:4px 10px;border:none;border-radius:15px;cursor:pointer;font-size:.8em;transition:background-color .2s ease;margin-left:10px;vertical-align:middle}
-        .share-reply-button:hover{background-color:#5a6268}
-        .share-reply-button i{margin-right:4px}
+        .message-list li#loading-placeholder,.message-list li#no-messages-placeholder{text-align:center;color:#888;padding:25px;font-style:italic; font-size: 1.05em; background-color: #f9f9f9; border-radius: 8px;}
+        .message-item{background:#fff;border:1px solid #eef0f2;padding:18px 22px;margin-bottom:18px;border-radius:12px;border-left:6px solid #f8b195;position:relative;box-shadow:0 3px 8px rgba(0,0,0,.07);transition:transform 0.2s ease, box-shadow 0.2s ease;}
+        .message-item:hover {transform: translateY(-2px); box-shadow: 0 5px 12px rgba(0,0,0,.1);}
+        .message-item p{margin:0 0 10px;word-wrap:break-word;font-size:1.1em;color:#3d3d3d; line-height: 1.5;}
+        .message-time{font-size:.85em;color:#999;display:block}
+        .share-reply-button{background-color:#6c757d;color:#fff;padding:6px 12px;border:none;border-radius:20px;cursor:pointer;font-size:.85em;margin-left:10px;transition:background-color 0.2s ease;}
+        .share-reply-button:hover{background-color:#5a6268;} .share-reply-button i{margin-right:5px;}
         .message-item.clickable-message{cursor:pointer}
-        .message-item.clickable-message:hover{background-color:#fef8f5}
-        .message-item.unread{font-weight:600;border-left-color:#f67280}
-        #logout-button{background-color:#6c757d;color:#fff;padding:10px 18px;border:none;border-radius:25px;cursor:pointer;font-size:.95em;transition:background-color .2s ease;display:block;margin:30px auto 0;min-width:120px;text-align:center}
-        #logout-button i{margin-right:6px}
-        #logout-button:hover{background-color:#5a6268}
-        #inbox-indicator{position:fixed;top:20px;right:20px;background-color:rgba(0,0,0,.7);color:#fff;width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3em;text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:1000;transition:transform .2s ease,background-color .2s ease;cursor:pointer}
-        #inbox-indicator:hover{transform:scale(1.1)}
-        #inbox-indicator.active{background-color:rgba(246,114,128,.8)}
-        #unread-badge{position:absolute;top:-5px;right:-5px;background-color:#f67280;color:#fff;font-size:.7em;font-weight:700;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;display:none}
-        #inbox-indicator.has-unread #unread-badge{display:block}
-        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:1001;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
-        .modal-overlay.show{opacity:1;visibility:visible}
-        .modal-content{background-color:#fff;padding:25px 30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.2);width:90%;max-width:500px;position:relative;transform:scale(.9);transition:transform .3s ease; max-height: 90vh; overflow-y: auto;}
+        .message-item.unread{border-left-color:#f67280; background-color: #fffafb;} .message-item.unread p {font-weight: 500;}
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,.65);display:none;justify-content:center;align-items:center;z-index:1001;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease}
+        .modal-overlay.show{display:flex;opacity:1;visibility:visible}
+        .modal-content{background-color:#fff;padding:30px 35px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.2);width:90%;max-width:550px;position:relative;transform:scale(.95);transition:transform .3s ease; max-height: 90vh; overflow-y: auto;}
         .modal-overlay.show .modal-content{transform:scale(1)}
-        .close-button{position:absolute;top:10px;right:15px;background:0 0;border:none;font-size:1.8em;color:#aaa;cursor:pointer;padding:0;line-height:1}
-        .close-button:hover{color:#777}
-        .modal-content h3{margin-top:0;margin-bottom:20px;text-align:center;color:#333}
-        .original-message-display{background-color:#f8f9fa;padding:10px 15px;border-radius:8px;margin-bottom:15px;border:1px solid #eee}
-        .original-message-display p{margin:5px 0;font-size:.95em;word-wrap:break-word}
-        .original-message-display strong{color:#555}
-        .reply-input-area label{display:block;margin-bottom:5px;font-weight:700;font-size:.9em;color:#444}
-        .reply-input-area textarea{width:100%;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:1em;min-height:60px;resize:vertical;margin-bottom:20px}
-        .theme-selection-area{margin-bottom:20px;border-top:1px solid #eee;padding-top:15px;}
-        .theme-selection-area label{display:block;margin-bottom:10px;font-weight:bold;font-size:.9em;color:#444;}
-        .theme-options{display:flex;flex-wrap:wrap;gap:10px;}
-        .theme-option{display:flex;align-items:center;cursor:pointer;padding:5px;border:1px solid transparent;border-radius:5px;}
-        .theme-option input[type="radio"]{margin-right:8px; accent-color: #f67280;}
-        .theme-option .theme-preview{width:25px;height:25px;border-radius:4px;margin-right:8px;border:1px solid #ccc;background-size:cover;}
-        .theme-option .theme-name{font-size:0.9em;}
+        .close-button{position:absolute;top:12px;right:18px;background:0 0;border:none;font-size:2em;color:#aaa;cursor:pointer;padding:0;line-height:1}.close-button:hover{color:#777}
+        .modal-content h3{margin-top:0;margin-bottom:22px;text-align:center;color:#333; font-size: 1.5em;}
+        .original-message-display{background-color:#f8f9fa;padding:12px 18px;border-radius:10px;margin-bottom:18px;border:1px solid #e9ecef}
+        .original-message-display p{margin:6px 0;font-size:1em;word-wrap:break-word}
+        .reply-input-area textarea{width:100%;border:1px solid #ccc;border-radius:10px;padding:12px;font-size:1.05em;min-height:70px;margin-bottom:18px}
+        .theme-selection-area{margin-bottom:20px;border-top:1px solid #eee;padding-top:18px;}
+        .theme-selection-area label{display:block;margin-bottom:12px;font-weight:600;font-size:1em;color:#444;}
+        .theme-options{display:flex;flex-wrap:wrap;gap:12px;}
+        .theme-option{display:flex;align-items:center;cursor:pointer;padding:8px 10px;border:2px solid transparent;border-radius:8px; transition: border-color 0.2s ease; background-color: #f9f9f9;}
+        .theme-option:hover {border-color: #f8b195;}
+        .theme-option input[type="radio"]{margin-right:10px; accent-color: #f67280; transform: scale(1.1);}
+        .theme-option .theme-preview{width:30px;height:30px;border-radius:6px;margin-right:10px;border:1px solid #ccc;background-size:cover;}
+        .theme-option .theme-name{font-size:0.95em;}
         .theme-option input[type="radio"]:checked + .theme-preview + .theme-name{font-weight:bold;color:#c06c84;}
-        .modal-actions{text-align:right;display:flex;justify-content:flex-end;align-items:center;margin-top:10px;}
-        #modal-username-display{font-size:.85em;color:#555;margin-right:auto}
-        #download-reply-button{background-color:#f67280;color:#fff;padding:10px 15px;border:none;border-radius:20px;cursor:pointer;font-size:.95em;transition:background-color .2s ease}
-        #download-reply-button:hover{background-color:#c06c84}
-        #download-reply-button:disabled{background-color:#ccc;cursor:not-allowed}
-        #download-reply-button i{margin-right:6px}
-        #download-status{margin-left:10px;font-size:.9em;font-weight:500}
-        #download-status:empty{display:none}
-        #download-status.success{color:green}
-        #download-status.error{color:red}
-        #download-status.info{color:orange}
-        .delete-all-section{text-align:center;margin-bottom:20px}
-        .danger-button{background-color:#d9534f;color:#fff;padding:10px 18px;border:none;border-radius:25px;cursor:pointer;font-size:.95em;transition:background-color .2s ease}
-        .danger-button:hover{background-color:#c9302c}
-        .danger-button:disabled{background-color:#ccc;cursor:not-allowed}
-        .danger-button i{margin-right:6px}
-        #delete-all-status.error{color:red}
-        #delete-all-status.success{color:green}
-        #delete-all-status.info{color:orange}
-        .poll-section{padding:15px;border: 1px solid #eee; border-radius: 8px; margin-bottom: 20px;}
-        .poll-section h3{margin-top:0;text-align:left;font-size:1.2em;margin-bottom:15px;}
-        .poll-section input[type=text], .poll-section textarea{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ccc;border-radius:5px;box-sizing:border-box;font-size:1em;}
-        .poll-options-container .poll-option-input{display:flex;align-items:center;margin-bottom:8px;}
-        .poll-options-container input[type=text]{flex-grow:1;margin-bottom:0;margin-right:5px;}
-        .poll-options-container button{padding:5px 10px;font-size:0.8em;background-color:#6c757d;}
-        .poll-options-container button:hover{background-color:#5a6268;}
-        #add-poll-option-button{margin-top:5px;display:inline-block; width: auto;}
-        #create-poll-status{text-align:left; margin-top: 10px;}
+        .theme-option input[type="radio"]:checked ~ .theme-name {color: #c06c84;} /* Juga untuk nama */
+        .modal-actions{text-align:right;display:flex;justify-content:flex-end;align-items:center;margin-top:15px; gap:10px;}
+        #download-reply-button, #make-reply-story-button {background-color:#f67280;color:#fff;padding:10px 20px;border:none;border-radius:25px;cursor:pointer;font-size:1em;font-weight:500;}
+        #make-reply-story-button {background-color: #5cb85c;}
+        #download-reply-button:disabled, #make-reply-story-button:disabled {background-color:#ccc;cursor:not-allowed}
+        #download-reply-button i, #make-reply-story-button i {margin-right: 7px;}
+        #download-status{margin-left:10px;font-size:.9em;font-weight:500; color: #555;}
+        .delete-all-section{text-align:center;margin-bottom:25px; padding:15px; background-color:#fff3f3; border: 1px solid #ffe0e0; border-radius:8px;}
+        .danger-button{background-color:#e74c3c;color:#fff;padding:10px 20px;border:none;border-radius:25px;font-size:1em;font-weight:500;}.danger-button:hover{background-color:#c0392b;}
+        .poll-section{padding:20px;border: 1px solid #e9ecef; border-radius: 10px; margin-bottom: 25px; background-color: #fbfcfe;}
+        .poll-options-container .poll-option-input{display:flex;align-items:center;margin-bottom:10px;}
+        .poll-options-container .poll-option-input input {flex-grow:1; margin-right: 8px; margin-bottom: 0;}
+        .poll-options-container .poll-option-input button {padding: 8px 12px; font-size: 0.9em; background-color: #6c757d; border-radius: 20px;}
+        #add-poll-option-button{margin-top:8px;display:inline-block; width: auto; background-color: #7f8c8d; font-size: 0.9em;}
         .poll-list{list-style:none;padding:0;margin:0;}
-        .poll-item{background:#f9f9f9;padding:15px;border-radius:8px;margin-bottom:15px;border:1px solid #eee;}
-        .poll-item-question{font-weight:bold;margin-bottom:10px;word-wrap:break-word;}
-        .poll-item-options li{margin-bottom:8px;font-size:0.95em;}
-        .poll-option-text{margin-right:5px;}
-        .poll-option-votes{font-weight:bold;margin-left:5px;color:#555;}
-        .poll-option-bar-container{background-color:#e9ecef;border-radius:5px;overflow:hidden;height:10px;margin-top:3px;}
+        .poll-item{background:#fff;padding:18px;border-radius:10px;margin-bottom:18px;border:1px solid #eef0f2; box-shadow: 0 2px 6px rgba(0,0,0,0.06);}
+        .poll-item-question{font-weight:600;margin-bottom:12px;word-wrap:break-word; font-size: 1.1em; color: #333;}
+        .poll-item-options li{margin-bottom:10px;font-size:1em;} .poll-option-text{margin-right:8px;} .poll-option-votes{font-weight:bold;margin-left:8px;color:#555;}
+        .poll-option-bar-container{background-color:#e9ecef;border-radius:5px;overflow:hidden;height:12px;margin-top:4px;}
         .poll-option-bar{background-color:#f67280;height:100%;width:0%;transition:width 0.5s ease;}
-        .poll-item-actions{margin-top:10px;text-align:right;}
-        .poll-item-actions button{padding:5px 10px;font-size:0.8em;margin-left:5px;}
-        .poll-item-status{font-size:0.8em;color:#6c757d;margin-right:10px;display:inline-block;font-style: italic;}
-        @media (max-width:600px){.container{padding:20px}h1{font-size:1.6em}.edit-section input[type=text]{width:calc(100% - 85px)}#inbox-indicator{width:40px;height:40px;font-size:1.1em;bottom:15px;right:15px;top:auto}#unread-badge{width:18px;height:18px;line-height:18px;font-size:.65em}.modal-content{padding:20px}}
+        .poll-item-actions{margin-top:12px;text-align:right; display:flex; gap:8px; justify-content: flex-end;}
+        .poll-item-actions button{padding:6px 12px;font-size:0.85em;border-radius:20px;}
+        .poll-item-status{font-size:0.85em;color:#6c757d;margin-right:10px;display:inline-block;font-style: italic;}
+        #logout-button{background-color:#6c757d;color:#fff;padding:12px 22px;border:none;border-radius:25px;cursor:pointer;font-size:1.05em;font-weight:500;display:block;margin:35px auto 0;} #logout-button:hover{background-color:#545b62;} #logout-button i {margin-right: 8px;}
+        #inbox-indicator{position:fixed;bottom:20px;right:20px;background-color:rgba(0,0,0,.75);color:#fff;width:50px;height:50px;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:1.4em;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.25);z-index:1000;transition:transform .2s ease,background-color .2s ease;cursor:pointer}
+        #inbox-indicator:hover{transform:scale(1.08)} #inbox-indicator.active{background-color:rgba(246,114,128,.9)}
+        #unread-badge{position:absolute;top:-6px;right:-6px;background-color:#e74c3c;color:#fff;font-size:.7em;font-weight:700;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;display:none}
+        #inbox-indicator.has-unread #unread-badge{display:block}
+        
+        .story-creation-section, .story-management-section {background: #fdfdff; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #e9ecef; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .story-type-fields { margin-top: 15px; margin-bottom: 15px; padding: 15px; border: 1px dashed #d1d8e0; border-radius: 8px; background-color: #fff;}
+        .story-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; }
+        .story-item-card {border: 1px solid #e0e6ed; border-radius: 10px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); background-color: #fff; position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 300px; transition: box-shadow 0.2s ease;}
+        .story-item-card:hover {box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
+        .story-item-card img, .story-item-card video {width: 100%; height: 160px; object-fit: cover; border-radius: 6px; display: block; margin-bottom: 10px; background-color: #f0f2f5;}
+        .story-item-card .story-text-preview {padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 10px; height: 160px; display: flex; align-items: center; justify-content: center; word-break: break-word; overflow: hidden; font-size: 1em; line-height: 1.45; background-color: #f0f2f5;}
+        .story-item-card p { font-size: 0.88em; margin-bottom: 5px; line-height: 1.4; color: #667085;}
+        .story-item-card p i {margin-right: 6px; color: #98a2b3;}
+        .story-item-actions { margin-top: auto; padding-top: 10px; border-top: 1px solid #f1f3f5; display: flex; justify-content: space-between; gap: 8px;}
+        .story-item-actions button { font-size: 0.8em; padding: 7px 12px; border-radius: 20px; flex-grow: 1; font-weight: 500;}
+        .story-item-actions .danger-button {background-color: #e74c3c;} .story-item-actions .danger-button:hover{background-color:#c0392b;}
+        #media-preview { border: 1px solid #e0e6ed; width: 100%; max-height: 180px; display: none; margin-top: 12px; object-fit: contain; border-radius: 6px;}
     </style>
 </head>
 <body>
     <div id="inbox-indicator" style="display: none;"> <i class="fas fa-envelope"></i> <span id="unread-badge"></span> </div>
     <div class="container">
-        <h1>Akun Saya</h1>
-        <div class="profile-info"> <img src="https://via.placeholder.com/60" alt="Avatar" id="user-avatar-inbox"> <div class="profile-details"> <p>Username: <strong id="username-display-inbox">Memuat...</strong></p> <p>Prompt Saat Ini: <strong id="current-prompt-display">Memuat...</strong></p> </div> </div>
-        <div class="edit-section"> <form id="prompt-form"> <label for="new-prompt">Ubah Prompt Anda:</label> <div> <input type="text" id="new-prompt" name="prompt" placeholder="Tulis prompt baru..." required maxlength="100"> <button type="submit"><i class="fas fa-save"></i> Simpan</button> </div> <p id="prompt-update-status" class="update-status"></p> </form> <form id="avatar-form"> <label for="avatar-file">Ubah Foto Profil:</label> <div> <input type="file" id="avatar-file" name="avatar" accept="image/*" required> <button type="submit"><i class="fas fa-upload"></i> Upload</button> </div> <p id="avatar-update-status" class="update-status"></p> </form> </div>
-        <div class="ngl-link-section"> <p>Bagikan Link NGL Anda:</p> <p><a href="#" id="ngl-link" target="_blank">Memuat link...</a></p> </div>
-        <div class="copy-action"> <button id="copy-link-button"><i class="fas fa-copy"></i> Salin Link</button> <span id="copy-status"></span> </div>
+        <h1>Dasbor Saya</h1>
+        <div class="profile-info"> <img src="https://via.placeholder.com/70/eeeeee/cccccc?text=A" alt="Avatar" id="user-avatar-inbox"> <div class="profile-details"> <p>Username: <strong id="username-display-inbox">Memuat...</strong></p> <p>Prompt Saat Ini: <strong id="current-prompt-display">Memuat...</strong></p> </div> </div>
+        
+        <div class="edit-section">
+            <form id="prompt-form"> <label for="new-prompt">Ubah Prompt Anda (maks 100 karakter):</label> <div> <input type="text" id="new-prompt" name="prompt" placeholder="Tulis prompt baru yang menarik..." required maxlength="100"> <button type="submit"><i class="fas fa-save"></i> Simpan</button> </div> <p id="prompt-update-status" class="update-status"></p> </form>
+            <form id="avatar-form"> <label for="avatar-file">Ubah Foto Profil (JPG/PNG, maks 2MB):</label> <div> <input type="file" id="avatar-file" name="avatar" accept="image/jpeg,image/png" required> <button type="submit"><i class="fas fa-upload"></i> Upload</button> </div> <p id="avatar-update-status" class="update-status"></p> </form>
+        </div>
+        
+        <div class="ngl-link-section"> <p>Bagikan Link NGL Unik Anda:</p> <p><a href="#" id="ngl-link" target="_blank">Memuat link...</a></p>
+            <div class="copy-action" style="margin-top:10px; margin-bottom:0;"> <button id="copy-link-button"><i class="fas fa-copy"></i> Salin Link NGL</button> <span id="copy-status"></span> </div>
+        </div>
 
         <div class="tabs">
-            <button class="tab-button active" data-tab="inbox-tab"><i class="fas fa-envelope"></i> Inbox</button>
-            <button class="tab-button" data-tab="polling-tab"><i class="fas fa-poll"></i> Polling</button>
+            <button class="tab-button active" data-tab="inbox-tab"><i class="fas fa-envelope"></i> Inbox Pesan</button>
+            <button class="tab-button" data-tab="polling-tab"><i class="fas fa-poll"></i> Polling Saya</button>
+            <button class="tab-button" data-tab="stories-tab"><i class="fas fa-bolt"></i> Stories Saya</button>
         </div>
 
         <div id="inbox-tab" class="tab-content active">
-            <div class="delete-all-section"> <button id="delete-all-messages-button" class="danger-button"> <i class="fas fa-trash-alt"></i> Hapus Semua Pesan</button> <p id="delete-all-status" class="update-status" style="margin-top: 8px;"></p> </div>
+            <div class="delete-all-section"> <button id="delete-all-messages-button" class="danger-button"> <i class="fas fa-trash-alt"></i> Hapus Semua Pesan di Inbox</button> <p id="delete-all-status" class="update-status" style="margin-top: 10px; text-align:center;"></p> </div>
             <div id="inbox-content-area"> <ul id="message-list" class="message-list"> <li id="loading-placeholder">Memuat pesan...</li> </ul> </div>
         </div>
 
         <div id="polling-tab" class="tab-content">
              <div class="poll-section">
-                 <h3>Buat Polling Baru</h3>
+                 <h3><i class="fas fa-plus-circle"></i> Buat Polling Baru</h3>
                  <form id="create-poll-form">
-                     <label for="poll-question">Pertanyaan Polling:</label>
-                     <input type="text" id="poll-question" name="question" placeholder="Masukkan pertanyaan polling..." required maxlength="280">
-                     <label>Opsi Jawaban (minimal 2):</label>
+                     <label for="poll-question">Pertanyaan Polling (maks 280 karakter):</label>
+                     <input type="text" id="poll-question" name="question" placeholder="Contoh: Lebih suka teh atau kopi?" required maxlength="280">
+                     <label>Opsi Jawaban (minimal 2, maks 10, @100 karakter):</label>
                      <div id="poll-options-container">
                          <div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 1" required maxlength="100"></div>
                          <div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 2" required maxlength="100"></div>
                      </div>
-                     <button type="button" id="add-poll-option-button"><i class="fas fa-plus"></i> Tambah Opsi</button>
-                     <button type="submit" style="display: block; width: 100%; margin-top: 15px;"><i class="fas fa-check"></i> Buat Polling</button>
+                     <button type="button" id="add-poll-option-button" style="width:auto; padding: 8px 15px; font-size:0.9em;"><i class="fas fa-plus"></i> Tambah Opsi</button>
+                     <button type="submit" style="display: block; width: 100%; margin-top: 20px;"><i class="fas fa-check-circle"></i> Buat dan Publikasikan Polling</button>
                      <p id="create-poll-status" class="update-status"></p>
                  </form>
              </div>
              <div class="poll-section">
-                <h3>Polling Saya</h3>
+                <h3><i class="fas fa-tasks"></i> Kelola Polling Saya</h3>
                 <ul id="my-polls-list" class="poll-list">
-                    <li id="loading-polls-placeholder">Memuat polling...</li>
+                    <li id="loading-polls-placeholder" style="width:100%; text-align:center;">Memuat polling...</li>
                 </ul>
             </div>
         </div>
 
-        <button id="logout-button"><i class="fas fa-right-from-bracket"></i> Logout</button>
+        <div id="stories-tab" class="tab-content">
+            <div class="story-creation-section">
+                <h3><i class="fas fa-magic"></i> Buat Story Baru</h3>
+                <form id="create-story-form">
+                    <label for="story-type">Pilih Tipe Story:</label>
+                    <select id="story-type" name="type" required>
+                        <option value="" disabled selected>-- Pilih Tipe Story --</option>
+                        <option value="text_story">Story Teks</option>
+                        <option value="image_upload">Upload Gambar</option>
+                        <option value="video_upload">Upload Video (Maks 25MB)</option>
+                        <option value="image_reply" id="story-type-image-reply-option" style="display:none;">Dari Balasan Pesan</option>
+                    </select>
+
+                    <div id="text-story-fields" class="story-type-fields" style="display: none;">
+                        <label for="story-text-content">Isi Teks Story (maks 280 karakter):</label>
+                        <textarea id="story-text-content" name="textContent" maxlength="280" placeholder="Tuliskan sesuatu yang menarik..."></textarea>
+                        <div style="display:flex; gap:15px; margin-bottom:10px;">
+                            <div style="flex:1;"> <label for="story-bg-color">Warna Latar:</label> <input type="color" id="story-bg-color" name="backgroundColor" value="#C06C84"></div>
+                            <div style="flex:1;"> <label for="story-font-color">Warna Teks:</label> <input type="color" id="story-font-color" name="fontColor" value="#FFFFFF"></div>
+                        </div>
+                         <div style="display:flex; gap:15px;">
+                            <div style="flex:1;"><label for="story-font-family">Jenis Font:</label>
+                            <select id="story-font-family" name="fontFamily"><option value="sans-serif">Sans Serif</option><option value="serif">Serif</option><option value="monospace">Monospace</option><option value="cursive">Cursive</option><option value="'Arial', sans-serif">Arial</option><option value="'Georgia', serif">Georgia</option><option value="'Times New Roman', Times, serif">Times New Roman</option><option value="'Impact', Charcoal, sans-serif">Impact</option></select></div>
+                            <div style="flex:1;"><label for="story-text-align">Posisi Teks:</label>
+                            <select id="story-text-align" name="textAlign"><option value="center">Tengah</option><option value="left">Kiri</option><option value="right">Kanan</option></select></div>
+                        </div>
+                    </div>
+
+                    <div id="media-story-fields" class="story-type-fields" style="display: none;">
+                        <label for="story-media-file">Pilih File Media (Gambar/Video, maks 25MB):</label>
+                        <input type="file" id="story-media-file" name="mediaFile" accept="image/*,video/*">
+                        <img id="media-preview" src="#" alt="Media Preview">
+                    </div>
+                    
+                    <label for="story-duration" style="margin-top:10px;">Durasi Tampil (detik, untuk gambar/teks, 3-15s):</label>
+                    <input type="number" id="story-duration" name="durationSeconds" value="7" min="3" max="15">
+
+                    <input type="hidden" id="story-reply-image-url" name="replyImageMediaUrl">
+                    <input type="hidden" id="story-original-message" name="originalMessageContent">
+                    <input type="hidden" id="story-user-reply" name="userReplyContent">
+
+                    <button type="submit" style="margin-top:20px; width:100%;"><i class="fas fa-plus-circle"></i> Buat dan Publikasikan Story</button>
+                    <p id="create-story-status" class="update-status"></p>
+                </form>
+            </div>
+
+            <div class="story-management-section">
+                <h3><i class="fas fa-stream"></i> Stories Aktif (Terlihat Publik)</h3>
+                <ul id="active-stories-list" class="story-list">
+                    <li id="loading-active-stories" style="width:100%; text-align:center; color:#777; padding:15px; background-color:#f9f9f9; border-radius:6px;">Memuat stories aktif...</li>
+                </ul>
+                <h3><i class="fas fa-archive"></i> Stories Diarsipkan (Hanya Anda yang Lihat)</h3>
+                <ul id="archived-stories-list" class="story-list">
+                    <li id="loading-archived-stories" style="width:100%; text-align:center; color:#777; padding:15px; background-color:#f9f9f9; border-radius:6px;">Memuat stories arsip...</li>
+                </ul>
+            </div>
+        </div>
+
+        <button id="logout-button"><i class="fas fa-sign-out-alt"></i> Logout dari Akun</button>
     </div>
 
-    <div id="share-modal" class="modal-overlay"> <div class="modal-content"> <button id="close-modal-button" class="close-button">×</button> <h3>Bagikan Balasan Anda</h3> <div class="original-message-display"> <p><strong>Pesan Anonim:</strong></p> <p id="modal-original-message"></p> </div> <div class="reply-input-area"> <label for="modal-reply-text">Balasan Anda:</label> <textarea id="modal-reply-text" rows="3" placeholder="Tulis balasan Anda di sini..."></textarea> </div> <div class="theme-selection-area"> <label>Pilih Tema Gambar:</label> <div id="theme-options-container" class="theme-options"></div> </div> <div class="modal-actions"> <span id="modal-username-display" ></span> <span id="download-status"></span> <button id="download-reply-button" disabled><i class="fas fa-download"></i> Unduh Gambar</button> </div> </div> </div>
+    <div id="share-modal" class="modal-overlay"> <div class="modal-content">
+        <button id="close-modal-button" class="close-button" aria-label="Tutup Modal">×</button>
+        <h3><i class="fas fa-share-alt"></i> Bagikan Balasan Anda</h3>
+        <div class="original-message-display"><p><strong>Pesan Anonim Diterima:</strong></p> <p id="modal-original-message"></p></div>
+        <div class="reply-input-area"><label for="modal-reply-text">Tulis Balasan Anda di Sini:</label><textarea id="modal-reply-text" rows="3" placeholder="Balasan Anda..."></textarea></div>
+        <div class="theme-selection-area"><label>Pilih Tema untuk Gambar Balasan:</label> <div id="theme-options-container" class="theme-options"></div> </div>
+        <div class="modal-actions">
+            <span id="modal-username-display" style="margin-right:auto; font-size:0.9em; color:#555;"></span>
+            <span id="download-status"></span>
+            <button id="make-reply-story-button" disabled><i class="fas fa-bolt"></i> Jadikan Story</button>
+            <button id="download-reply-button" disabled><i class="fas fa-download"></i> Unduh Gambar</button>
+        </div>
+    </div> </div>
 
     <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
     <script>
+        // Variabel DOM Global (sudah ada dan ditambahkan)
         const messageList = document.getElementById('message-list'); const nglLinkEl = document.getElementById('ngl-link'); const copyButton = document.getElementById('copy-link-button'); const copyStatus = document.getElementById('copy-status'); const logoutButton = document.getElementById('logout-button'); const loadingPlaceholder = document.getElementById('loading-placeholder'); const userAvatarInbox = document.getElementById('user-avatar-inbox'); const usernameDisplayInbox = document.getElementById('username-display-inbox'); const currentPromptDisplay = document.getElementById('current-prompt-display'); const promptForm = document.getElementById('prompt-form'); const newPromptInput = document.getElementById('new-prompt'); const promptUpdateStatus = document.getElementById('prompt-update-status'); const avatarForm = document.getElementById('avatar-form'); const avatarFile = document.getElementById('avatar-file'); const avatarUpdateStatus = document.getElementById('avatar-update-status'); const inboxIndicator = document.getElementById('inbox-indicator'); const unreadBadge = document.getElementById('unread-badge'); const inboxContentArea = document.getElementById('inbox-content-area'); const modalOverlay = document.getElementById('share-modal'); const modalContent = modalOverlay.querySelector('.modal-content'); const closeModalButton = document.getElementById('close-modal-button'); const modalOriginalMessage = document.getElementById('modal-original-message'); const modalReplyText = document.getElementById('modal-reply-text'); const downloadButton = document.getElementById('download-reply-button'); const downloadStatus = document.getElementById('download-status'); const modalUsernameDisplay = document.getElementById('modal-username-display'); const deleteAllButton = document.getElementById('delete-all-messages-button'); const deleteAllStatus = document.getElementById('delete-all-status'); const tabsContainer = document.querySelector('.tabs'); const tabButtons = document.querySelectorAll('.tab-button'); const tabContents = document.querySelectorAll('.tab-content'); const createPollForm = document.getElementById('create-poll-form'); const pollOptionsContainer = document.getElementById('poll-options-container'); const addPollOptionButton = document.getElementById('add-poll-option-button'); const createPollStatus = document.getElementById('create-poll-status'); const myPollsList = document.getElementById('my-polls-list'); const loadingPollsPlaceholder = document.getElementById('loading-polls-placeholder'); const themeOptionsContainer = document.getElementById('theme-options-container');
-
         let currentMessageContent = ''; let loggedInUsername = ''; let currentMessageId = null; let selectedTheme = null;
+        const replyThemes = [ { id: 'sunset', name: 'Sunset', type: 'gradient', colors: ['#f8b195', '#f67280', '#c06c84'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, { id: 'ocean', name: 'Ocean', type: 'gradient', colors: ['#2193b0', '#6dd5ed'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, { id: 'forest', name: 'Forest', type: 'gradient', colors: ['#134E5E', '#71B280'], fontColor: '#ffffff', fontFamily: 'serif', fontWeight: 'normal' }, { id: 'bubblegum', name: 'Bubblegum', type: 'gradient', colors: ['#ff758c', '#ff7eb3'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'bold'}, { id: 'plain_white', name: 'Putih Polos', type: 'solid', colors: ['#ffffff'], fontColor: '#333333', fontFamily: 'sans-serif', fontWeight: 'bold' }, { id: 'plain_black', name: 'Hitam Polos', type: 'solid', colors: ['#222222'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, ];
+        
+        const storiesTabButton = document.querySelector('.tab-button[data-tab="stories-tab"]');
+        const storiesTabContent = document.getElementById('stories-tab');
+        const createStoryForm = document.getElementById('create-story-form');
+        const storyTypeSelect = document.getElementById('story-type');
+        const textStoryFields = document.getElementById('text-story-fields');
+        const mediaStoryFields = document.getElementById('media-story-fields');
+        const storyMediaFile = document.getElementById('story-media-file');
+        const mediaPreview = document.getElementById('media-preview');
+        const createStoryStatus = document.getElementById('create-story-status');
+        const activeStoriesList = document.getElementById('active-stories-list');
+        const archivedStoriesList = document.getElementById('archived-stories-list');
+        const storyReplyImageUrlInput = document.getElementById('story-reply-image-url');
+        const storyOriginalMessageInput = document.getElementById('story-original-message');
+        const storyUserReplyInput = document.getElementById('story-user-reply');
+        const storyTypeImageReplyOption = document.getElementById('story-type-image-reply-option');
+        const makeReplyStoryButton = document.getElementById('make-reply-story-button');
+        let currentReplyCloudinaryUrl = null; 
+        let currentOriginalMessageForStory = null;
+        let currentUserReplyForStory = null;
 
-        const replyThemes = [ { id: 'sunset', name: 'Sunset', type: 'gradient', colors: ['#f8b195', '#f67280', '#c06c84'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, { id: 'ocean', name: 'Ocean', type: 'gradient', colors: ['#2193b0', '#6dd5ed'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, { id: 'forest', name: 'Forest', type: 'gradient', colors: ['#134E5E', '#71B280'], fontColor: '#ffffff', fontFamily: 'serif', fontWeight: 'normal' }, { id: 'bubblegum', name: 'Bubblegum', type: 'gradient', colors: ['#ff758c', '#ff7eb3'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'bold'}, { id: 'plain_white', name: 'Putih', type: 'solid', colors: ['#ffffff'], fontColor: '#333333', fontFamily: 'sans-serif', fontWeight: 'bold' }, { id: 'plain_black', name: 'Hitam', type: 'solid', colors: ['#222222'], fontColor: '#ffffff', fontFamily: 'sans-serif', fontWeight: 'normal' }, ];
-
-        function populateThemeOptions() { themeOptionsContainer.innerHTML = ''; replyThemes.forEach((theme, index) => { const label = document.createElement('label'); label.className = 'theme-option'; label.htmlFor = `theme-${theme.id}`; const radio = document.createElement('input'); radio.type = 'radio'; radio.id = `theme-${theme.id}`; radio.name = 'replyTheme'; radio.value = theme.id; radio.required = true; if (index === 0) { radio.checked = true; selectedTheme = theme; downloadButton.disabled = !modalReplyText.value.trim(); } radio.addEventListener('change', () => { selectedTheme = theme; downloadButton.disabled = !modalReplyText.value.trim(); }); const preview = document.createElement('div'); preview.className = 'theme-preview'; if (theme.type === 'gradient') { preview.style.background = `linear-gradient(45deg, ${theme.colors.join(', ')})`; } else { preview.style.backgroundColor = theme.colors[0]; } const name = document.createElement('span'); name.className = 'theme-name'; name.textContent = theme.name; label.appendChild(radio); label.appendChild(preview); label.appendChild(name); themeOptionsContainer.appendChild(label); }); }
-        populateThemeOptions(); // Panggil sekali saat load
-
+        function populateThemeOptions() { themeOptionsContainer.innerHTML = ''; replyThemes.forEach((theme, index) => { const label = document.createElement('label'); label.className = 'theme-option'; label.htmlFor = `theme-${theme.id}`; const radio = document.createElement('input'); radio.type = 'radio'; radio.id = `theme-${theme.id}`; radio.name = 'replyTheme'; radio.value = theme.id; radio.required = true; if (index === 0) { radio.checked = true; selectedTheme = theme; } radio.addEventListener('change', () => { selectedTheme = theme; const hasText = modalReplyText.value.trim().length > 0; downloadButton.disabled = !hasText; if(makeReplyStoryButton) makeReplyStoryButton.disabled = !hasText || !currentReplyCloudinaryUrl; }); const preview = document.createElement('div'); preview.className = 'theme-preview'; if (theme.type === 'gradient') { preview.style.background = `linear-gradient(45deg, ${theme.colors.join(', ')})`; } else { preview.style.backgroundColor = theme.colors[0]; } const name = document.createElement('span'); name.className = 'theme-name'; name.textContent = theme.name; label.appendChild(radio); label.appendChild(preview); label.appendChild(name); themeOptionsContainer.appendChild(label); }); }
+        populateThemeOptions();
         function renderMessage(msg) { const item = document.createElement('li'); item.className = 'message-item clickable-message'; item.dataset.id = msg._id; item.dataset.content = msg.content; if (msg.isRead === false) { item.classList.add('unread'); } const content = document.createElement('p'); content.textContent = msg.content; const time = document.createElement('span'); time.className = 'message-time'; time.textContent = new Date(msg.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); const shareButton = document.createElement('button'); shareButton.innerHTML = '<i class="fas fa-share-square"></i> Balas'; shareButton.className = 'share-reply-button'; item.appendChild(content); item.appendChild(time); item.appendChild(shareButton); return item; }
-        function displayNoMessages() { messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link Anda!</li>'; }
-        async function fetchMessages() { try { const response = await fetch('/api/my-messages'); if (!response.ok) { if (response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal memuat pesan'); } const messages = await response.json(); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = ''; if (messages.length === 0) { displayNoMessages(); } else { messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); }); } } catch (error) { console.error(error); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = '<li id="no-messages-placeholder">Gagal memuat pesan.</li>'; } }
-        async function fetchUserInfo() { try { const response = await fetch('/api/me'); if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal mengambil info user'); } const userData = await response.json(); loggedInUsername = userData.username; usernameDisplayInbox.textContent = userData.username; currentPromptDisplay.textContent = userData.prompt || '-'; userAvatarInbox.src = userData.profilePictureUrl || "https://via.placeholder.com/60"; newPromptInput.value = userData.prompt || ''; const fullLink = `${window.location.origin}/ngl/${userData.username}`; nglLinkEl.textContent = fullLink; nglLinkEl.href = fullLink; updateUnreadIndicator(userData.unreadCount || 0); modalUsernameDisplay.textContent = `@${loggedInUsername}`; } catch (error) { console.error(error); usernameDisplayInbox.textContent = 'Error'; currentPromptDisplay.textContent = 'Error'; nglLinkEl.textContent = 'Gagal memuat link'; inboxIndicator.style.display = 'none'; } }
-        function updateUnreadIndicator(count) { if (count > 0) { unreadBadge.textContent = count > 99 ? '99+' : count; inboxIndicator.classList.add('has-unread'); inboxIndicator.style.display = 'flex'; } else { inboxIndicator.classList.remove('has-unread'); inboxIndicator.style.display = 'flex'; } }
+        function displayNoMessages() { messageList.innerHTML = '<li id="no-messages-placeholder">Belum ada pesan. Bagikan link NGL Anda agar teman-teman bisa mengirim pesan!</li>'; }
+        async function fetchMessages() { try { const response = await fetch('/api/my-messages'); if (!response.ok) { if (response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal memuat pesan'); } const messages = await response.json(); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = ''; if (messages.length === 0) { displayNoMessages(); } else { messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); messages.forEach(msg => { messageList.appendChild(renderMessage(msg)); }); } } catch (error) { console.error(error); const loadingLi = messageList.querySelector('#loading-placeholder'); if(loadingLi) loadingLi.remove(); messageList.innerHTML = '<li id="no-messages-placeholder" style="color:red;">Gagal memuat pesan. Coba refresh.</li>'; } }
+        async function fetchUserInfo() { try { const response = await fetch('/api/me'); if (!response.ok) { if(response.status === 401) { window.location.href = '/'; return; } throw new Error('Gagal mengambil info user'); } const userData = await response.json(); loggedInUsername = userData.username; usernameDisplayInbox.textContent = userData.username; currentPromptDisplay.textContent = userData.prompt || '- Belum diatur -'; userAvatarInbox.src = userData.profilePictureUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.username)}&background=random&size=70`; newPromptInput.value = userData.prompt || ''; const fullLink = `${window.location.origin}/ngl/${userData.username}`; nglLinkEl.textContent = fullLink; nglLinkEl.href = fullLink; updateUnreadIndicator(userData.unreadCount || 0); modalUsernameDisplay.textContent = `@${loggedInUsername}`; } catch (error) { console.error(error); usernameDisplayInbox.textContent = 'Error'; currentPromptDisplay.textContent = 'Error'; nglLinkEl.textContent = 'Gagal memuat link'; if(inboxIndicator) inboxIndicator.style.display = 'none'; } }
+        function updateUnreadIndicator(count) { if(!inboxIndicator || !unreadBadge) return; if (count > 0) { unreadBadge.textContent = count > 99 ? '99+' : count; inboxIndicator.classList.add('has-unread'); inboxIndicator.style.display = 'flex'; } else { inboxIndicator.classList.remove('has-unread'); inboxIndicator.style.display = 'flex'; unreadBadge.style.display='none';}}
         async function markMessageAsRead(messageId) { const messageItem = messageList.querySelector(`.message-item[data-id="${messageId}"]`); if (messageItem && messageItem.classList.contains('unread')) { try { messageItem.classList.remove('unread'); await fetch(`/api/messages/${messageId}/read`, { method: 'PUT' }); const response = await fetch('/api/me'); if (response.ok) { const data = await response.json(); updateUnreadIndicator(data.unreadCount || 0); } } catch (error) { console.error("Gagal menandai pesan dibaca:", error); if (messageItem) messageItem.classList.add('unread'); } } }
-        copyButton.addEventListener('click', () => { const linkToCopy = nglLinkEl.href; if (linkToCopy && linkToCopy !== '#') { navigator.clipboard.writeText(linkToCopy).then(() => { copyStatus.textContent = 'Link disalin!'; copyStatus.className = 'success'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500); }).catch(err => { copyStatus.textContent = 'Gagal menyalin'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); }); } else { copyStatus.textContent = 'Link belum siap'; copyStatus.className = 'error'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 3000); } });
-        logoutButton.addEventListener('click', async () => { logoutButton.disabled = true; logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...'; try { const response = await fetch('/api/logout', { method: 'POST' }); if (response.ok) { window.location.href = '/'; } else { alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; } } catch (error) { alert('Terjadi kesalahan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-right-from-bracket"></i> Logout'; } });
-        promptForm.addEventListener('submit', async (e) => { e.preventDefault(); const newPrompt = newPromptInput.value.trim(); if (!newPrompt) { promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error'; return; } const sb = promptForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; promptUpdateStatus.textContent = 'Menyimpan...'; promptUpdateStatus.className = 'update-status info'; try { const response = await fetch('/api/me/prompt', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt }) }); const result = await response.json(); if (response.ok) { promptUpdateStatus.textContent = result.message || 'Prompt diperbarui!'; promptUpdateStatus.className = 'update-status success'; currentPromptDisplay.textContent = result.newPrompt; } else { promptUpdateStatus.textContent = result.message || 'Gagal memperbarui.'; promptUpdateStatus.className = 'update-status error'; } } catch(error) { promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error'; } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-save"></i> Simpan'; setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000); } });
-        avatarForm.addEventListener('submit', async (e) => { e.preventDefault(); const file = avatarFile.files[0]; if (!file) { avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error'; return; } const sb = avatarForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; avatarUpdateStatus.textContent = 'Mengupload...'; avatarUpdateStatus.className = 'update-status info'; const formData = new FormData(); formData.append('avatar', file); try { const response = await fetch('/api/me/avatar', { method: 'POST', body: formData }); const result = await response.json(); if (response.ok) { avatarUpdateStatus.textContent = 'Avatar diperbarui!'; avatarUpdateStatus.className = 'update-status success'; userAvatarInbox.src = result.newAvatarUrl; avatarFile.value = null; } else { avatarUpdateStatus.textContent = result.message || 'Gagal upload.'; avatarUpdateStatus.className = 'update-status error'; } } catch(error) { avatarUpdateStatus.textContent = 'Error upload.'; avatarUpdateStatus.className = 'update-status error'; } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-upload"></i> Upload'; setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000); } });
+        if(copyButton) copyButton.addEventListener('click', () => { const linkToCopy = nglLinkEl.href; if (linkToCopy && linkToCopy !== '#') { navigator.clipboard.writeText(linkToCopy).then(() => { copyStatus.textContent = 'Link NGL berhasil disalin!'; copyStatus.className = 'success'; setTimeout(() => { copyStatus.textContent = ''; copyStatus.className = ''; }, 2500); }).catch(err => { copyStatus.textContent = 'Gagal menyalin link.'; copyStatus.className = 'error'; }); } else { copyStatus.textContent = 'Link belum siap.'; copyStatus.className = 'error'; } setTimeout(() => { if(copyStatus.textContent.includes('Gagal') || copyStatus.textContent.includes('belum siap')) {copyStatus.textContent = ''; copyStatus.className = '';} }, 3000); });
+        if(logoutButton) logoutButton.addEventListener('click', async () => { logoutButton.disabled = true; logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logout...'; try { const response = await fetch('/api/logout', { method: 'POST' }); if (response.ok) { window.location.href = '/'; } else { alert('Logout gagal.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout'; } } catch (error) { alert('Terjadi kesalahan jaringan.'); logoutButton.disabled = false; logoutButton.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout'; } });
+        if(promptForm) promptForm.addEventListener('submit', async (e) => { e.preventDefault(); const newPrompt = newPromptInput.value.trim(); if (!newPrompt) { promptUpdateStatus.textContent = 'Prompt tidak boleh kosong.'; promptUpdateStatus.className = 'update-status error'; return; } const sb = promptForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...'; promptUpdateStatus.textContent = 'Menyimpan prompt...'; promptUpdateStatus.className = 'update-status info'; try { const response = await fetch('/api/me/prompt', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: newPrompt }) }); const result = await response.json(); if (response.ok) { promptUpdateStatus.textContent = result.message || 'Prompt berhasil diperbarui!'; promptUpdateStatus.className = 'update-status success'; currentPromptDisplay.textContent = result.newPrompt; } else { promptUpdateStatus.textContent = result.message || 'Gagal memperbarui prompt.'; promptUpdateStatus.className = 'update-status error'; } } catch(error) { promptUpdateStatus.textContent = 'Terjadi kesalahan jaringan.'; promptUpdateStatus.className = 'update-status error'; } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-save"></i> Simpan'; setTimeout(() => { promptUpdateStatus.textContent = ''; promptUpdateStatus.className = 'update-status'; }, 4000); } });
+        if(avatarForm) avatarForm.addEventListener('submit', async (e) => { e.preventDefault(); const file = avatarFile.files[0]; if (!file) { avatarUpdateStatus.textContent = 'Pilih file gambar.'; avatarUpdateStatus.className = 'update-status error'; return; } if (file.size > 2 * 1024 * 1024) { avatarUpdateStatus.textContent = 'Ukuran file maksimal 2MB.'; avatarUpdateStatus.className = 'update-status error'; return; } const sb = avatarForm.querySelector('button'); sb.disabled = true; sb.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengupload...'; avatarUpdateStatus.textContent = 'Mengupload avatar...'; avatarUpdateStatus.className = 'update-status info'; const formData = new FormData(); formData.append('avatar', file); try { const response = await fetch('/api/me/avatar', { method: 'POST', body: formData }); const result = await response.json(); if (response.ok) { avatarUpdateStatus.textContent = 'Avatar berhasil diperbarui!'; avatarUpdateStatus.className = 'update-status success'; userAvatarInbox.src = result.newAvatarUrl + '?t=' + new Date().getTime(); avatarFile.value = null; } else { avatarUpdateStatus.textContent = result.message || 'Gagal upload avatar.'; avatarUpdateStatus.className = 'update-status error'; } } catch(error) { avatarUpdateStatus.textContent = 'Error upload avatar.'; avatarUpdateStatus.className = 'update-status error'; } finally { sb.disabled = false; sb.innerHTML = '<i class="fas fa-upload"></i> Upload'; setTimeout(() => { avatarUpdateStatus.textContent = ''; avatarUpdateStatus.className = 'update-status'; }, 4000); } });
         function drawTextWithWrapping(context, text, x, y, maxWidth, lineHeight, maxHeight) { const words = text.split(' '); let line = ''; let currentY = y; context.textBaseline = 'top'; for (let n = 0; n < words.length; n++) { const testLine = line + words[n] + ' '; const metrics = context.measureText(testLine); const testWidth = metrics.width; if (testWidth > maxWidth && n > 0) { if (maxHeight && currentY + lineHeight * 2 > y + maxHeight) { let trimmedLine = line.trim(); while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) { trimmedLine = trimmedLine.slice(0, -1); } context.fillText(trimmedLine + '...', x, currentY); return currentY + lineHeight; } context.fillText(line.trim(), x, currentY); line = words[n] + ' '; currentY += lineHeight; } else { line = testLine; } } if (!maxHeight || (currentY + lineHeight <= y + maxHeight)) { context.fillText(line.trim(), x, currentY); currentY += lineHeight; } else if (maxHeight && line.trim().length > 0) { let trimmedLine = line.trim(); while (context.measureText(trimmedLine + '...').width > maxWidth && trimmedLine.length > 0) { trimmedLine = trimmedLine.slice(0, -1); } context.fillText(trimmedLine + '...', x, currentY - lineHeight); } return currentY; }
-        async function generateAndDownloadImage() { const originalMsg = currentMessageContent; const replyMsg = modalReplyText.value.trim(); const username = loggedInUsername || "Anda"; if (!replyMsg || !selectedTheme) { downloadStatus.textContent = 'Balasan dan tema harus dipilih.'; downloadStatus.className = 'error'; setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 3000); return; } downloadStatus.textContent = 'Membuat gambar...'; downloadStatus.className = 'info'; downloadButton.disabled = true; try { const canvas = document.createElement('canvas'); const canvasWidth = 540; const canvasHeight = 960; canvas.width = canvasWidth; canvas.height = canvasHeight; const ctx = canvas.getContext('2d'); if (selectedTheme.type === 'gradient') { const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight); let step = 1 / (selectedTheme.colors.length - 1); if (selectedTheme.colors.length === 1) step = 1; selectedTheme.colors.forEach((color, index) => gradient.addColorStop(Math.min(index * step, 1), color)); ctx.fillStyle = gradient; } else { ctx.fillStyle = selectedTheme.colors[0]; } ctx.fillRect(0, 0, canvasWidth, canvasHeight); const padding = 40; const textMaxWidth = canvasWidth - 2 * padding; let currentY = padding + 20; ctx.font = 'italic 18px sans-serif'; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(50,50,50,0.7)' : 'rgba(0, 0, 0, 0.6)'; ctx.fillText('Anonim bilang:', padding, currentY); currentY += 30; ctx.font = `${selectedTheme.fontWeight || 'normal'} 24px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.fontColor || '#ffffff'; const anonMaxHeight = canvasHeight * 0.35; currentY = drawTextWithWrapping(ctx, originalMsg, padding, currentY, textMaxWidth, 32, anonMaxHeight); currentY += 35; ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(padding, currentY); ctx.lineTo(canvasWidth - padding, currentY); ctx.stroke(); currentY += 35; ctx.font = `bold 18px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(30,30,30,0.8)' : 'rgba(0, 0, 0, 0.7)'; ctx.fillText(`Balasan @${username}:`, padding, currentY); currentY += 30; ctx.font = `${selectedTheme.fontWeight || 'normal'} 24px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.fontColor || '#ffffff'; const replyMaxHeight = canvasHeight - currentY - padding - 40; currentY = drawTextWithWrapping(ctx, replyMsg, padding, currentY, textMaxWidth, 32, replyMaxHeight); ctx.font = `14px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(100,100,100,0.8)' : 'rgba(255, 255, 255, 0.7)'; ctx.textAlign = 'center'; ctx.fillText(`ngl.clone.app/${username}`, canvasWidth / 2, canvasHeight - padding + 5); ctx.textAlign = 'left'; const dataUrl = canvas.toDataURL('image/png'); const link = document.createElement('a'); link.href = dataUrl; link.download = `ngl_reply_${Date.now()}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link); downloadStatus.textContent = 'Gambar diunduh!'; downloadStatus.className = 'success'; modalReplyText.value = ''; setTimeout(() => { hideModal(); }, 1500); } catch (error) { console.error("Error generating image:", error); downloadStatus.textContent = 'Gagal membuat gambar.'; downloadStatus.className = 'error'; } finally { downloadButton.disabled = false; setTimeout(() => { downloadStatus.textContent = ''; downloadStatus.className = ''; }, 4000); } }
-        function showModal(originalMessage, messageId) { currentMessageContent = originalMessage; currentMessageId = messageId; modalOriginalMessage.textContent = originalMessage; modalReplyText.value = ''; downloadStatus.textContent = ''; downloadStatus.className = ''; const firstThemeRadio = themeOptionsContainer.querySelector('input[type="radio"]'); if (firstThemeRadio) { firstThemeRadio.checked = true; selectedTheme = replyThemes.find(t => t.id === firstThemeRadio.value); } else { selectedTheme = null; } downloadButton.disabled = true; modalOverlay.style.display = 'flex'; setTimeout(() => { modalOverlay.classList.add('show'); modalReplyText.focus(); }, 10); markMessageAsRead(messageId); }
-        function hideModal() { modalOverlay.classList.remove('show'); setTimeout(() => { modalOverlay.style.display = 'none'; currentMessageId = null; currentMessageContent = ''; }, 300); }
-        messageList.addEventListener('click', (e) => { const targetButton = e.target.closest('.share-reply-button'); const targetItem = e.target.closest('.message-item.clickable-message'); let messageItemElement = null; if (targetButton) { messageItemElement = targetButton.closest('.message-item'); } else if (targetItem) { messageItemElement = targetItem; } if (messageItemElement && messageItemElement.dataset.content && messageItemElement.dataset.id) { showModal(messageItemElement.dataset.content, messageItemElement.dataset.id); } });
-        closeModalButton.addEventListener('click', hideModal);
-        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) { hideModal(); } });
-        downloadButton.addEventListener('click', generateAndDownloadImage);
-        modalReplyText.addEventListener('input', () => { downloadButton.disabled = !modalReplyText.value.trim() || !selectedTheme; }); // Enable/disable based on text and theme
-        inboxIndicator.addEventListener('click', (e) => { e.preventDefault(); const isHidden = inboxContentArea.style.display === 'none'; inboxContentArea.style.display = isHidden ? 'block' : 'none'; inboxIndicator.classList.toggle('active', isHidden); if (isHidden && window.innerWidth < 700) { inboxContentArea.scrollIntoView({ behavior: 'smooth' }); } });
-        deleteAllButton.addEventListener('click', async () => { if (!confirm('Apakah Anda yakin ingin menghapus SEMUA pesan di inbox Anda? Tindakan ini tidak dapat dibatalkan.')) { return; } deleteAllStatus.textContent = 'Menghapus...'; deleteAllStatus.className = 'update-status info'; deleteAllButton.disabled = true; deleteAllButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...'; try { const response = await fetch('/api/my-messages/all', { method: 'DELETE' }); const result = await response.json(); if (response.ok) { deleteAllStatus.textContent = result.message || 'Semua pesan berhasil dihapus.'; deleteAllStatus.className = 'update-status success'; messageList.innerHTML = ''; displayNoMessages(); updateUnreadIndicator(0); } else { deleteAllStatus.textContent = result.message || 'Gagal menghapus pesan.'; deleteAllStatus.className = 'update-status error'; } } catch (error) { console.error("Error deleting all messages:", error); deleteAllStatus.textContent = 'Terjadi kesalahan jaringan.'; deleteAllStatus.className = 'update-status error'; } finally { deleteAllButton.disabled = false; deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Pesan'; setTimeout(() => { deleteAllStatus.textContent = ''; deleteAllStatus.className = 'update-status'; }, 5000); } });
-        tabsContainer.addEventListener('click', (e) => { if (e.target.classList.contains('tab-button')) { const targetTab = e.target.dataset.tab; tabButtons.forEach(btn => btn.classList.remove('active')); tabContents.forEach(content => content.classList.remove('active')); e.target.classList.add('active'); document.getElementById(targetTab).classList.add('active'); if (targetTab === 'polling-tab') { fetchMyPolls(); } } });
-        addPollOptionButton.addEventListener('click', () => { const optionInputs = pollOptionsContainer.querySelectorAll('.poll-option-input'); if (optionInputs.length >= 10) return; const newOptionDiv = document.createElement('div'); newOptionDiv.className = 'poll-option-input'; const newInput = document.createElement('input'); newInput.type = 'text'; newInput.name = 'options[]'; newInput.placeholder = `Opsi ${optionInputs.length + 1}`; newInput.required = true; newInput.maxLength = 100; const removeButton = document.createElement('button'); removeButton.type = 'button'; removeButton.innerHTML = '<i class="fas fa-times"></i>'; removeButton.addEventListener('click', () => newOptionDiv.remove()); newOptionDiv.appendChild(newInput); newOptionDiv.appendChild(removeButton); pollOptionsContainer.appendChild(newOptionDiv); });
-        createPollForm.addEventListener('submit', async (e) => { e.preventDefault(); const question = document.getElementById('poll-question').value.trim(); const optionInputs = pollOptionsContainer.querySelectorAll('input[name="options[]"]'); const options = Array.from(optionInputs).map(input => input.value.trim()).filter(opt => opt.length > 0); if (options.length < 2) { createPollStatus.textContent = 'Polling harus memiliki minimal 2 opsi yang valid.'; createPollStatus.className = 'update-status error'; return; } const submitButton = createPollForm.querySelector('button[type="submit"]'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat...'; createPollStatus.textContent = 'Membuat polling...'; createPollStatus.className = 'update-status info'; try { const response = await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) }); const result = await response.json(); if (response.ok) { createPollStatus.textContent = 'Polling berhasil dibuat!'; createPollStatus.className = 'update-status success'; createPollForm.reset(); pollOptionsContainer.innerHTML = '<div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 1" required maxlength="100"></div><div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 2" required maxlength="100"></div>'; fetchMyPolls(); } else { createPollStatus.textContent = result.message || 'Gagal membuat polling.'; createPollStatus.className = 'update-status error'; } } catch (error) { console.error("Create poll error:", error); createPollStatus.textContent = 'Terjadi kesalahan jaringan.'; createPollStatus.className = 'update-status error'; } finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-check"></i> Buat Polling'; setTimeout(() => { createPollStatus.textContent = ''; createPollStatus.className = 'update-status'; }, 4000); } });
-        async function fetchMyPolls() { myPollsList.innerHTML = '<li id="loading-polls-placeholder">Memuat polling...</li>'; try { const response = await fetch('/api/my-polls'); if (!response.ok) { throw new Error('Gagal memuat polling'); } const polls = await response.json(); const loadingPollsLi = myPollsList.querySelector('#loading-polls-placeholder'); if (loadingPollsLi) loadingPollsLi.remove(); myPollsList.innerHTML = ''; if (polls.length === 0) { myPollsList.innerHTML = '<li>Anda belum membuat polling.</li>'; } else { polls.forEach(poll => myPollsList.appendChild(renderPollItem(poll))); } } catch (error) { console.error(error); const loadingPollsLi = myPollsList.querySelector('#loading-polls-placeholder'); if (loadingPollsLi) loadingPollsLi.remove(); myPollsList.innerHTML = '<li>Gagal memuat polling.</li>'; } }
-        function renderPollItem(poll) { const li = document.createElement('li'); li.className = 'poll-item'; li.dataset.pollId = poll._id; const questionDiv = document.createElement('div'); questionDiv.className = 'poll-item-question'; questionDiv.textContent = poll.question; const optionsUl = document.createElement('ul'); optionsUl.className = 'poll-item-options'; let totalVotes = 0; poll.options.forEach(opt => totalVotes += opt.votes); poll.options.forEach(opt => { const optLi = document.createElement('li'); const textSpan = document.createElement('span'); textSpan.className = 'poll-option-text'; textSpan.textContent = opt.text; const votesSpan = document.createElement('span'); votesSpan.className = 'poll-option-votes'; const percentage = totalVotes > 0 ? ((opt.votes / totalVotes) * 100).toFixed(1) : 0; votesSpan.textContent = `(${opt.votes} suara, ${percentage}%)`; const barContainer = document.createElement('div'); barContainer.className = 'poll-option-bar-container'; const bar = document.createElement('div'); bar.className = 'poll-option-bar'; bar.style.width = `${percentage}%`; barContainer.appendChild(bar); optLi.appendChild(textSpan); optLi.appendChild(votesSpan); optLi.appendChild(barContainer); optionsUl.appendChild(optLi); }); const actionsDiv = document.createElement('div'); actionsDiv.className = 'poll-item-actions'; const statusSpan = document.createElement('span'); statusSpan.className = 'poll-item-status'; statusSpan.textContent = poll.isActive ? 'Aktif' : 'Nonaktif'; const toggleButton = document.createElement('button'); toggleButton.innerHTML = poll.isActive ? '<i class="fas fa-toggle-off"></i> Nonaktifkan' : '<i class="fas fa-toggle-on"></i> Aktifkan'; toggleButton.onclick = () => togglePollStatus(poll._id, !poll.isActive); const deleteButton = document.createElement('button'); deleteButton.className = 'danger-button'; deleteButton.innerHTML = '<i class="fas fa-trash"></i> Hapus'; deleteButton.onclick = () => deletePoll(poll._id); actionsDiv.appendChild(statusSpan); actionsDiv.appendChild(toggleButton); actionsDiv.appendChild(deleteButton); li.appendChild(questionDiv); li.appendChild(optionsUl); li.appendChild(actionsDiv); return li; }
+        
+        async function uploadDataUrlToCloudinary(dataUrl, filename) {
+            try {
+                const response = await fetch('/api/stories/upload-reply-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imageDataUrl: dataUrl, filename: filename || `reply_img_${Date.now()}.png` })
+                });
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.message || 'Upload gambar balasan gagal.');
+                }
+                return await response.json();
+            } catch (err) {
+                console.error("Error uploading reply image to backend:", err);
+                if(downloadStatus) {downloadStatus.textContent = err.message || 'Gagal upload gambar balasan.'; downloadStatus.className = 'error update-status';}
+                return null;
+            }
+        }
+
+        async function generateAndDownloadImage() {
+            const originalMsg = currentMessageContent;
+            const replyMsg = modalReplyText.value.trim();
+            const username = loggedInUsername || "Anda";
+            if (!replyMsg || !selectedTheme) { if(downloadStatus) {downloadStatus.textContent = 'Balasan dan tema harus dipilih.'; downloadStatus.className = 'error update-status';} return; }
+            if(downloadStatus) {downloadStatus.textContent = 'Membuat gambar...'; downloadStatus.className = 'info update-status';}
+            if(downloadButton) downloadButton.disabled = true; if(makeReplyStoryButton) makeReplyStoryButton.disabled = true;
+            try {
+                const canvas = document.createElement('canvas'); const canvasWidth = 540; const canvasHeight = 960; canvas.width = canvasWidth; canvas.height = canvasHeight; const ctx = canvas.getContext('2d');
+                if (selectedTheme.type === 'gradient') { const gradient = ctx.createLinearGradient(0, 0, canvasWidth, canvasHeight); let step = 1 / (selectedTheme.colors.length - 1); if (selectedTheme.colors.length === 1) step = 1; selectedTheme.colors.forEach((color, index) => gradient.addColorStop(Math.min(index * step, 1), color)); ctx.fillStyle = gradient; } else { ctx.fillStyle = selectedTheme.colors[0]; }
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight); let currentYPos = 40 + 20;
+                ctx.font = 'italic 18px ' + (selectedTheme.fontFamily || 'sans-serif'); ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(50,50,50,0.7)' : 'rgba(0, 0, 0, 0.6)'; ctx.fillText('Anonim bilang:', 40, currentYPos); currentYPos += 30;
+                ctx.font = `${selectedTheme.fontWeight || 'normal'} 24px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.fontColor || '#ffffff';
+                currentYPos = drawTextWithWrapping(ctx, originalMsg, 40, currentYPos, canvasWidth - 80, 32, canvasHeight * 0.35); currentYPos += 35;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(40, currentYPos); ctx.lineTo(canvasWidth - 40, currentYPos); ctx.stroke(); currentYPos += 35;
+                ctx.font = `bold 18px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(30,30,30,0.8)' : 'rgba(0, 0, 0, 0.7)'; ctx.fillText(`Balasan @${username}:`, 40, currentYPos); currentYPos += 30;
+                ctx.font = `${selectedTheme.fontWeight || 'normal'} 24px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.fontColor || '#ffffff';
+                currentYPos = drawTextWithWrapping(ctx, replyMsg, 40, currentYPos, canvasWidth - 80, 32, canvasHeight - currentYPos - 40 - 40);
+                ctx.font = `14px ${selectedTheme.fontFamily || 'sans-serif'}`; ctx.fillStyle = selectedTheme.type === 'solid' && selectedTheme.colors[0] === '#ffffff' ? 'rgba(100,100,100,0.8)' : 'rgba(255, 255, 255, 0.7)'; ctx.textAlign = 'center'; ctx.fillText(`ngl.clone.app/${username}`, canvasWidth / 2, canvasHeight - 40 + 5); ctx.textAlign = 'left';
+                const dataUrl = canvas.toDataURL('image/png');
+
+                const uploadedImage = await uploadDataUrlToCloudinary(dataUrl);
+                if (uploadedImage && uploadedImage.secure_url) {
+                    currentReplyCloudinaryUrl = uploadedImage.secure_url;
+                    if(makeReplyStoryButton) makeReplyStoryButton.disabled = !modalReplyText.value.trim();
+                } else {
+                     if(makeReplyStoryButton) makeReplyStoryButton.disabled = true;
+                     if(downloadStatus && !downloadStatus.textContent.includes('Gagal')) {downloadStatus.textContent = 'Gambar siap diunduh, tapi gagal upload untuk story.'; downloadStatus.className = 'info update-status';}
+                }
+
+                const link = document.createElement('a'); link.href = dataUrl; link.download = `ngl_reply_${Date.now()}.png`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                if(downloadStatus && !downloadStatus.textContent.includes('Gagal') && !downloadStatus.textContent.includes('info')) {downloadStatus.textContent = 'Gambar berhasil diunduh!'; downloadStatus.className = 'success update-status';}
+                
+            } catch (error) { console.error("Error generating/downloading image:", error); if(downloadStatus) {downloadStatus.textContent = 'Gagal membuat gambar.'; downloadStatus.className = 'error update-status';}
+            } finally { if(downloadButton) downloadButton.disabled = false; setTimeout(() => { if(downloadStatus) {downloadStatus.textContent = ''; downloadStatus.className = 'update-status';} }, 5000); }
+        }
+        
+        async function showModal(originalMessage, messageId) { 
+             currentMessageContent = originalMessage; currentMessageId = messageId; modalOriginalMessage.textContent = originalMessage; modalReplyText.value = '';
+             if(downloadStatus) {downloadStatus.textContent = ''; downloadStatus.className = 'update-status';}
+             const firstThemeRadio = themeOptionsContainer.querySelector('input[type="radio"]'); if (firstThemeRadio) { firstThemeRadio.checked = true; selectedTheme = replyThemes.find(t => t.id === firstThemeRadio.value); } else { selectedTheme = null; }
+             if(downloadButton) downloadButton.disabled = true; if(makeReplyStoryButton) makeReplyStoryButton.disabled = true;
+             currentReplyCloudinaryUrl = null; currentOriginalMessageForStory = originalMessage; currentUserReplyForStory = null;
+             if(modalOverlay) {modalOverlay.style.display = 'flex'; setTimeout(() => { modalOverlay.classList.add('show'); if(modalReplyText) modalReplyText.focus(); }, 10);}
+             markMessageAsRead(messageId);
+        }
+        function hideModal() { if(modalOverlay) {modalOverlay.classList.remove('show'); setTimeout(() => { modalOverlay.style.display = 'none'; currentMessageId = null; currentMessageContent = '';}, 300);} }
+        if(messageList) messageList.addEventListener('click', (e) => { const targetButton = e.target.closest('.share-reply-button'); const targetItem = e.target.closest('.message-item.clickable-message'); let messageItemElement = null; if (targetButton) { messageItemElement = targetButton.closest('.message-item'); } else if (targetItem) { messageItemElement = targetItem; } if (messageItemElement && messageItemElement.dataset.content && messageItemElement.dataset.id) { showModal(messageItemElement.dataset.content, messageItemElement.dataset.id); } });
+        if(closeModalButton) closeModalButton.addEventListener('click', hideModal);
+        if(modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) { hideModal(); } });
+        if(downloadButton) downloadButton.addEventListener('click', generateAndDownloadImage);
+        if(modalReplyText) modalReplyText.addEventListener('input', () => { const hasText = modalReplyText.value.trim().length > 0; if(downloadButton) downloadButton.disabled = !hasText || !selectedTheme; if(makeReplyStoryButton) makeReplyStoryButton.disabled = !hasText || !selectedTheme || !currentReplyCloudinaryUrl; currentUserReplyForStory = modalReplyText.value.trim(); });
+        if(inboxIndicator) inboxIndicator.addEventListener('click', (e) => { e.preventDefault(); const isHidden = inboxContentArea.style.display === 'none'; inboxContentArea.style.display = isHidden ? 'block' : 'none'; inboxIndicator.classList.toggle('active', isHidden); if (isHidden && window.innerWidth < 700) { inboxContentArea.scrollIntoView({ behavior: 'smooth' }); } });
+        if(deleteAllButton) deleteAllButton.addEventListener('click', async () => { if (!confirm('PERHATIAN: Apakah Anda yakin ingin menghapus SEMUA pesan di inbox Anda? Tindakan ini TIDAK DAPAT DIBATALKAN.')) { return; } if(deleteAllStatus) {deleteAllStatus.textContent = 'Menghapus semua pesan...'; deleteAllStatus.className = 'update-status info';} deleteAllButton.disabled = true; deleteAllButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...'; try { const response = await fetch('/api/my-messages/all', { method: 'DELETE' }); const result = await response.json(); if (response.ok) { if(deleteAllStatus) {deleteAllStatus.textContent = result.message || 'Semua pesan berhasil dihapus.'; deleteAllStatus.className = 'update-status success';} messageList.innerHTML = ''; displayNoMessages(); updateUnreadIndicator(0); } else { if(deleteAllStatus) {deleteAllStatus.textContent = result.message || 'Gagal menghapus pesan.'; deleteAllStatus.className = 'update-status error';}} } catch (error) { console.error("Error deleting all messages:", error); if(deleteAllStatus) {deleteAllStatus.textContent = 'Terjadi kesalahan jaringan.'; deleteAllStatus.className = 'update-status error';}} finally { deleteAllButton.disabled = false; deleteAllButton.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Semua Pesan'; setTimeout(() => { if(deleteAllStatus) {deleteAllStatus.textContent = ''; deleteAllStatus.className = 'update-status';} }, 5000); } });
+        if(addPollOptionButton) addPollOptionButton.addEventListener('click', () => { const optionInputs = pollOptionsContainer.querySelectorAll('.poll-option-input'); if (optionInputs.length >= 10) { alert('Maksimal 10 opsi polling.'); return; } const newOptionDiv = document.createElement('div'); newOptionDiv.className = 'poll-option-input'; const newInput = document.createElement('input'); newInput.type = 'text'; newInput.name = 'options[]'; newInput.placeholder = `Opsi ${optionInputs.length + 1}`; newInput.required = true; newInput.maxLength = 100; const removeButton = document.createElement('button'); removeButton.type = 'button'; removeButton.innerHTML = '<i class="fas fa-times"></i> Hapus'; removeButton.onclick = () => newOptionDiv.remove(); newOptionDiv.appendChild(newInput); newOptionDiv.appendChild(removeButton); pollOptionsContainer.appendChild(newOptionDiv); });
+        if(createPollForm) createPollForm.addEventListener('submit', async (e) => { e.preventDefault(); const question = document.getElementById('poll-question').value.trim(); const optionInputs = pollOptionsContainer.querySelectorAll('input[name="options[]"]'); const options = Array.from(optionInputs).map(input => input.value.trim()).filter(opt => opt.length > 0); if (options.length < 2) { if(createPollStatus) {createPollStatus.textContent = 'Polling harus memiliki minimal 2 opsi yang valid.'; createPollStatus.className = 'update-status error';} return; } const submitButton = createPollForm.querySelector('button[type="submit"]'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat...'; if(createPollStatus) {createPollStatus.textContent = 'Membuat polling...'; createPollStatus.className = 'update-status info';} try { const response = await fetch('/api/polls', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, options }) }); const result = await response.json(); if (response.ok) { if(createPollStatus) {createPollStatus.textContent = 'Polling berhasil dibuat!'; createPollStatus.className = 'update-status success';} createPollForm.reset(); pollOptionsContainer.innerHTML = '<div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 1" required maxlength="100"></div><div class="poll-option-input"><input type="text" name="options[]" placeholder="Opsi 2" required maxlength="100"></div>'; fetchMyPolls(); } else { if(createPollStatus) {createPollStatus.textContent = result.message || 'Gagal membuat polling.'; createPollStatus.className = 'update-status error';}} } catch (error) { console.error("Create poll error:", error); if(createPollStatus) {createPollStatus.textContent = 'Terjadi kesalahan jaringan.'; createPollStatus.className = 'update-status error';}} finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-check-circle"></i> Buat dan Publikasikan Polling'; setTimeout(() => { if(createPollStatus) {createPollStatus.textContent = ''; createPollStatus.className = 'update-status';} }, 4000); } });
+        async function fetchMyPolls() { if(!myPollsList) return; myPollsList.innerHTML = '<li id="loading-polls-placeholder" style="width:100%; text-align:center; color:#777;">Memuat polling...</li>'; try { const response = await fetch('/api/my-polls'); if (!response.ok) { throw new Error('Gagal memuat polling'); } const polls = await response.json(); const loadingPollsLi = myPollsList.querySelector('#loading-polls-placeholder'); if (loadingPollsLi) loadingPollsLi.remove(); myPollsList.innerHTML = ''; if (polls.length === 0) { myPollsList.innerHTML = '<li style="width:100%; text-align:center; color:#777;">Anda belum membuat polling.</li>'; } else { polls.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(poll => myPollsList.appendChild(renderPollItem(poll))); } } catch (error) { console.error(error); const loadingPollsLi = myPollsList.querySelector('#loading-polls-placeholder'); if (loadingPollsLi) loadingPollsLi.remove(); myPollsList.innerHTML = '<li style="width:100%; text-align:center; color:red;">Gagal memuat polling.</li>'; } }
+        function renderPollItem(poll) { const li = document.createElement('li'); li.className = 'poll-item'; li.dataset.pollId = poll._id; const questionDiv = document.createElement('div'); questionDiv.className = 'poll-item-question'; questionDiv.textContent = poll.question; const optionsUl = document.createElement('ul'); optionsUl.className = 'poll-item-options'; let totalVotes = 0; poll.options.forEach(opt => totalVotes += (opt.votes || 0)); poll.options.forEach(opt => { const optLi = document.createElement('li'); const textSpan = document.createElement('span'); textSpan.className = 'poll-option-text'; textSpan.textContent = opt.text; const votesSpan = document.createElement('span'); votesSpan.className = 'poll-option-votes'; const voteCount = opt.votes || 0; const percentage = totalVotes > 0 ? ((voteCount / totalVotes) * 100).toFixed(1) : 0; votesSpan.textContent = `(${voteCount} suara, ${percentage}%)`; const barContainer = document.createElement('div'); barContainer.className = 'poll-option-bar-container'; const bar = document.createElement('div'); bar.className = 'poll-option-bar'; bar.style.width = `${percentage}%`; barContainer.appendChild(bar); optLi.appendChild(textSpan); optLi.appendChild(votesSpan); optLi.appendChild(barContainer); optionsUl.appendChild(optLi); }); const actionsDiv = document.createElement('div'); actionsDiv.className = 'poll-item-actions'; const statusSpan = document.createElement('span'); statusSpan.className = 'poll-item-status'; statusSpan.textContent = poll.isActive ? 'Aktif (Terlihat Publik)' : 'Nonaktif (Disembunyikan)'; const toggleButton = document.createElement('button'); toggleButton.innerHTML = poll.isActive ? '<i class="fas fa-eye-slash"></i> Nonaktifkan' : '<i class="fas fa-eye"></i> Aktifkan'; toggleButton.onclick = () => togglePollStatus(poll._id, !poll.isActive); const deleteButton = document.createElement('button'); deleteButton.className = 'danger-button'; deleteButton.innerHTML = '<i class="fas fa-trash"></i> Hapus'; deleteButton.onclick = () => deletePoll(poll._id); actionsDiv.appendChild(statusSpan); actionsDiv.appendChild(toggleButton); actionsDiv.appendChild(deleteButton); li.appendChild(questionDiv); li.appendChild(optionsUl); li.appendChild(actionsDiv); return li; }
         async function togglePollStatus(pollId, newStatus) { try { const response = await fetch(`/api/polls/${pollId}/toggle`, { method: 'PUT' }); if (response.ok) { fetchMyPolls(); } else { alert('Gagal mengubah status polling.'); } } catch (error) { alert('Terjadi kesalahan jaringan.'); } }
-        async function deletePoll(pollId) { if (!confirm('Apakah Anda yakin ingin menghapus polling ini?')) return; try { const response = await fetch(`/api/polls/${pollId}`, { method: 'DELETE' }); if (response.ok) { fetchMyPolls(); } else { alert('Gagal menghapus polling.'); } } catch (error) { alert('Terjadi kesalahan jaringan.'); } }
-        function startUserTourIfNew() { const urlParams = new URLSearchParams(window.location.search); if (urlParams.has('tour')) { const newUrl = window.location.pathname; window.history.replaceState({}, document.title, newUrl); setTimeout(() => { const linkSection = document.querySelector('#ngl-link-section'); const copyBtn = document.querySelector('#copy-link-button'); const inboxArea = document.querySelector('#inbox-content-area'); const promptFormEl = document.querySelector('#prompt-form'); const avatarFormEl = document.querySelector('#avatar-form'); const deleteAllBtn = document.querySelector('#delete-all-messages-button'); const inboxIcon = document.querySelector('#inbox-indicator'); const pollingTabBtn = document.querySelector('.tab-button[data-tab="polling-tab"]'); if (linkSection && copyBtn && inboxArea && promptFormEl && avatarFormEl && deleteAllBtn && inboxIcon && pollingTabBtn) { introJs().setOptions({ steps: [ { element: linkSection, intro: "Selamat datang! Ini link unik NGL Anda. Salin dan bagikan!" }, { element: copyBtn, intro: "Gunakan tombol ini untuk menyalin link.", position: 'bottom' }, { element: inboxIcon, intro: "Klik ikon ini untuk membuka atau menutup daftar pesan masuk Anda."}, { onbeforechange: function(targetElement) { inboxContentArea.style.display = 'block'; inboxIndicator.classList.add('active'); document.querySelector('.tab-button[data-tab="inbox-tab"]').classList.add('active'); document.querySelector('.tab-button[data-tab="polling-tab"]').classList.remove('active'); document.getElementById('inbox-tab').classList.add('active'); document.getElementById('polling-tab').classList.remove('active'); }, element: inboxArea, intro: "Pesan anonim yang masuk akan muncul di area ini." }, { element: promptFormEl, intro: "Ubah prompt yang tampil di profil Anda di sini." }, { element: avatarFormEl, intro: "Upload foto profil Anda." }, { element: pollingTabBtn, intro: "Anda juga bisa membuat polling anonim di tab ini!" }, { element: deleteAllBtn, intro: "Tombol ini untuk menghapus semua pesan sekaligus." } ], showProgress: true, showBullets: false, exitOnOverlayClick: false, }).start(); } else { console.warn("Elemen tour tidak ditemukan."); } }, 500); } }
+        async function deletePoll(pollId) { if (!confirm('Apakah Anda yakin ingin menghapus polling ini? Ini tidak dapat dibatalkan.')) return; try { const response = await fetch(`/api/polls/${pollId}`, { method: 'DELETE' }); if (response.ok) { fetchMyPolls(); } else { alert('Gagal menghapus polling.'); } } catch (error) { alert('Terjadi kesalahan jaringan.'); } }
+        function startUserTourIfNew() { const urlParams = new URLSearchParams(window.location.search); if (urlParams.has('tour')) { const newUrl = window.location.pathname; window.history.replaceState({}, document.title, newUrl); setTimeout(() => { const linkSection = document.querySelector('.ngl-link-section'); const copyBtn = document.querySelector('#copy-link-button'); const inboxArea = document.querySelector('#inbox-content-area'); const promptFormEl = document.querySelector('#prompt-form'); const avatarFormEl = document.querySelector('#avatar-form'); const deleteAllBtn = document.querySelector('#delete-all-messages-button'); const inboxIcon = document.querySelector('#inbox-indicator'); const pollingTabBtn = document.querySelector('.tab-button[data-tab="polling-tab"]'); const storiesTabBtn = document.querySelector('.tab-button[data-tab="stories-tab"]'); if (linkSection && copyBtn && inboxArea && promptFormEl && avatarFormEl && deleteAllBtn && inboxIcon && pollingTabBtn && storiesTabBtn) { introJs().setOptions({ steps: [ { element: linkSection, intro: "Selamat datang! Ini link unik NGL Anda. Salin dan bagikan ke teman-temanmu!" }, { element: copyBtn, intro: "Gunakan tombol ini untuk menyalin link NGL-mu dengan mudah.", position: 'bottom' }, { element: inboxIcon, intro: "Klik ikon amplop ini untuk membuka atau menutup daftar pesan masuk Anda. Ada badge angka jika ada pesan baru.", position:'left'}, { onbeforechange: function(targetElement) { if (inboxContentArea.style.display === 'none') {inboxIcon.click();} document.querySelector('.tab-button[data-tab="inbox-tab"]').click();}, element: inboxArea, intro: "Pesan anonim yang masuk akan muncul di area ini. Kamu bisa membalasnya dan menjadikannya story!", position:'top' }, { element: promptFormEl, intro: "Ubah prompt atau pertanyaan yang tampil di halaman profil publikmu di sini." }, { element: avatarFormEl, intro: "Upload foto profil terbaikmu agar profilmu lebih menarik." }, { element: pollingTabBtn, intro: "Buat polling anonim seru untuk teman-temanmu di tab ini!", onbeforechange: function() { pollingTabBtn.click(); } }, { element: storiesTabBtn, intro: "Bagikan momen atau balasan pesanmu sebagai Stories di sini!", onbeforechange: function() { storiesTabBtn.click(); } }, { element: deleteAllBtn, intro: "Tombol ini untuk menghapus semua pesan di inbox sekaligus. Hati-hati ya!", onbeforechange: function() { document.querySelector('.tab-button[data-tab="inbox-tab"]').click(); } } ], showProgress: true, showBullets: false, exitOnOverlayClick: false, tooltipClass: 'customTooltip' }).start(); } else { console.warn("Beberapa elemen tour tidak ditemukan, tur mungkin tidak lengkap."); } }, 500); } }
+        
+        if (makeReplyStoryButton) {
+            makeReplyStoryButton.addEventListener('click', async () => {
+                if (!currentReplyCloudinaryUrl) { alert('Gambar balasan belum siap atau gagal diupload. Klik "Unduh Gambar" dulu untuk membuat dan menguploadnya.'); return; }
+                if (!currentUserReplyForStory) { alert('Teks balasan tidak boleh kosong.'); return; }
+                hideModal(); if (storiesTabButton) storiesTabButton.click();
+                if (storyTypeImageReplyOption) storyTypeImageReplyOption.style.display = 'block';
+                if (storyTypeSelect) storyTypeSelect.value = 'image_reply';
+                handleStoryTypeChange();
+                if (storyReplyImageUrlInput) storyReplyImageUrlInput.value = currentReplyCloudinaryUrl;
+                if (storyOriginalMessageInput) storyOriginalMessageInput.value = currentOriginalMessageForStory;
+                if (storyUserReplyInput) storyUserReplyInput.value = currentUserReplyForStory;
+                const durationInput = document.getElementById('story-duration'); if(durationInput) durationInput.value = 7;
+                const submitEvent = new Event('submit', { bubbles: true, cancelable: true }); if (createStoryForm) createStoryForm.dispatchEvent(submitEvent);
+                currentReplyCloudinaryUrl = null; currentOriginalMessageForStory = null; currentUserReplyForStory = null;
+                if (storyTypeImageReplyOption) storyTypeImageReplyOption.style.display = 'none';
+            });
+        }
+
+        function handleStoryTypeChange() { if(!storyTypeSelect || !textStoryFields || !mediaStoryFields || !mediaPreview) return; const selectedType = storyTypeSelect.value; textStoryFields.style.display = 'none'; mediaStoryFields.style.display = 'none'; mediaPreview.style.display = 'none'; mediaPreview.src = "#"; if (storyMediaFile) storyMediaFile.value = null; const textContentInput = document.getElementById('story-text-content'); const mediaFileInput = document.getElementById('story-media-file'); if (textContentInput) textContentInput.required = false; if (mediaFileInput) mediaFileInput.required = false; if (selectedType === 'text_story') { textStoryFields.style.display = 'block'; if (textContentInput) textContentInput.required = true; } else if (selectedType === 'image_upload' || selectedType === 'video_upload') { mediaStoryFields.style.display = 'block'; if (mediaFileInput) { mediaFileInput.required = true; mediaFileInput.accept = selectedType === 'image_upload' ? 'image/*' : 'video/*'; } } }
+        if (storyTypeSelect) storyTypeSelect.addEventListener('change', handleStoryTypeChange);
+        if (storyMediaFile) storyMediaFile.addEventListener('change', (event) => { if(!mediaPreview) return; const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { if (file.type.startsWith('image/')) { mediaPreview.src = e.target.result; mediaPreview.style.display = 'block'; } else { mediaPreview.src = "#"; mediaPreview.style.display = 'none'; } }; reader.readAsDataURL(file); } else { mediaPreview.src = "#"; mediaPreview.style.display = 'none'; } });
+        if (createStoryForm) createStoryForm.addEventListener('submit', async (event) => { event.preventDefault(); const formData = new FormData(createStoryForm); const type = formData.get('type'); if (!type) { if(createStoryStatus) {createStoryStatus.textContent = 'Pilih tipe story terlebih dahulu.'; createStoryStatus.className = 'update-status error';} return; } if (type === 'image_reply' && !formData.get('replyImageMediaUrl')) { if(createStoryStatus) {createStoryStatus.textContent = 'Data story dari balasan tidak lengkap.'; createStoryStatus.className = 'update-status error';} return; } const mediaFile = formData.get('mediaFile'); if ((type === 'image_upload' || type === 'video_upload') && (!mediaFile || !mediaFile.name || mediaFile.size === 0) ) { if(createStoryStatus) {createStoryStatus.textContent = 'File media belum dipilih.'; createStoryStatus.className = 'update-status error';} return; } if (type === 'text_story' && (!formData.get('textContent') || formData.get('textContent').trim() === '')) { if(createStoryStatus) {createStoryStatus.textContent = 'Teks story tidak boleh kosong.'; createStoryStatus.className = 'update-status error';} return; } const submitButton = createStoryForm.querySelector('button[type="submit"]'); submitButton.disabled = true; submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membuat...'; if(createStoryStatus) {createStoryStatus.textContent = 'Membuat story...'; createStoryStatus.className = 'update-status info';} try { const response = await fetch('/api/stories', { method: 'POST', body: formData }); const result = await response.json(); if (response.ok) { if(createStoryStatus) {createStoryStatus.textContent = 'Story berhasil dibuat!'; createStoryStatus.className = 'update-status success';} if (typeof fetchUserStories === "function") fetchUserStories(); createStoryForm.reset(); handleStoryTypeChange(); if(storyReplyImageUrlInput) storyReplyImageUrlInput.value = ''; if(storyOriginalMessageInput) storyOriginalMessageInput.value = ''; if(storyUserReplyInput) storyUserReplyInput.value = ''; if(storyTypeImageReplyOption) storyTypeImageReplyOption.style.display = 'none'; } else { if(createStoryStatus) {createStoryStatus.textContent = result.message || 'Gagal membuat story.'; createStoryStatus.className = 'update-status error';} } } catch (error) { console.error("Create story error:", error); if(createStoryStatus) {createStoryStatus.textContent = 'Terjadi kesalahan jaringan.'; createStoryStatus.className = 'update-status error';} } finally { submitButton.disabled = false; submitButton.innerHTML = '<i class="fas fa-plus-circle"></i> Buat dan Publikasikan Story'; setTimeout(() => { if(createStoryStatus) {createStoryStatus.textContent = ''; createStoryStatus.className = 'update-status';} }, 5000); } });
+        function renderStoryItemCard(story, isArchived = false) { const card = document.createElement('li'); card.className = 'story-item-card'; card.dataset.storyId = story._id; let mediaElementHTML = ''; if (story.type === 'text_story') { mediaElementHTML = `<div class="story-text-preview" style="background-color: ${story.backgroundColor || '#C06C84'}; color: ${story.fontColor || '#FFFFFF'}; font-family: ${story.fontFamily || 'sans-serif'}; text-align: ${story.textAlign || 'center'};"> ${story.textContent.length > 70 ? story.textContent.substring(0, 67) + '...' : story.textContent} </div>`; } else if (story.mediaType === 'image') { mediaElementHTML = `<img src="${story.thumbnailUrl || story.mediaUrl}" alt="Story Image Preview">`; } else if (story.mediaType === 'video') { mediaElementHTML = `<video muted loop playsinline preload="metadata" style="pointer-events: none;"><source src="${story.thumbnailUrl || story.mediaUrl}#t=0.5" type="video/mp4">Video preview not available.</video>`; } const viewsHTML = `<p><i class="fas fa-eye"></i> Dilihat: ${story.viewCount || 0}</p>`; const createdAtHTML = `<p><i class="fas fa-calendar-alt"></i> ${new Date(story.createdAt).toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'})}</p>`; let expiresAtTextHTML = ''; if (story.expiresAt && !isArchived) { const timeLeftMs = new Date(story.expiresAt) - new Date(); if (timeLeftMs > 0) { const hoursLeft = Math.floor(timeLeftMs / (1000 * 60 * 60)); const minutesLeft = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60)); expiresAtTextHTML = `<p style="color: #28a745; font-size: 0.8em;"><i class="fas fa-hourglass-half"></i> ~${hoursLeft}j ${minutesLeft}m lagi</p>`; } else { expiresAtTextHTML = `<p style="color: #dc3545; font-size: 0.8em;"><i class="fas fa-hourglass-end"></i> Kedaluwarsa</p>`; } } else if (isArchived) { expiresAtTextHTML = `<p style="color: #6c757d; font-size: 0.8em;"><i class="fas fa-archive"></i> Diarsipkan</p>`; } card.innerHTML = mediaElementHTML + viewsHTML + createdAtHTML + expiresAtTextHTML; const actionsDiv = document.createElement('div'); actionsDiv.className = 'story-item-actions'; const deleteButton = document.createElement('button'); deleteButton.innerHTML = '<i class="fas fa-trash"></i> Hapus'; deleteButton.className = 'danger-button'; deleteButton.onclick = () => deleteStory(story._id); actionsDiv.appendChild(deleteButton); if (!isArchived) { const archiveButton = document.createElement('button'); archiveButton.innerHTML = '<i class="fas fa-archive"></i> Arsipkan'; archiveButton.onclick = () => archiveStory(story._id); actionsDiv.appendChild(archiveButton); } else { const unarchiveButton = document.createElement('button'); unarchiveButton.innerHTML = '<i class="fas fa-box-open"></i> Aktifkan'; unarchiveButton.onclick = () => unarchiveStory(story._id); actionsDiv.appendChild(unarchiveButton); } card.appendChild(actionsDiv); return card; }
+        async function fetchUserStories() { if(activeStoriesList) activeStoriesList.innerHTML = '<li id="loading-active-stories" style="width:100%; text-align:center; color:#777; padding:15px;">Memuat stories aktif...</li>'; if(archivedStoriesList) archivedStoriesList.innerHTML = '<li id="loading-archived-stories" style="width:100%; text-align:center; color:#777; padding:15px;">Memuat stories arsip...</li>'; try { const response = await fetch('/api/stories/me'); if (!response.ok) throw new Error('Gagal mengambil stories.'); const data = await response.json(); if(activeStoriesList) { activeStoriesList.innerHTML = ''; if (data.active && data.active.length > 0) { data.active.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(story => activeStoriesList.appendChild(renderStoryItemCard(story, false))); } else { activeStoriesList.innerHTML = '<li style="width:100%; text-align:center; color:#777; padding:15px;">Belum ada story aktif.</li>'; } } if(archivedStoriesList) { archivedStoriesList.innerHTML = ''; if (data.archived && data.archived.length > 0) { data.archived.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(story => archivedStoriesList.appendChild(renderStoryItemCard(story, true))); } else { archivedStoriesList.innerHTML = '<li style="width:100%; text-align:center; color:#777; padding:15px;">Belum ada story yang diarsipkan.</li>'; } } } catch (error) { console.error(error); if(activeStoriesList) activeStoriesList.innerHTML = '<li style="width:100%; text-align:center; color:red; padding:15px;">Gagal memuat stories aktif.</li>'; if(archivedStoriesList) archivedStoriesList.innerHTML = '<li style="width:100%; text-align:center; color:red; padding:15px;">Gagal memuat stories arsip.</li>'; } }
+        async function deleteStory(storyId) { if (!confirm('Anda yakin ingin menghapus story ini secara permanen?')) return; try { const response = await fetch(`/api/stories/${storyId}`, { method: 'DELETE' }); if (response.ok) { alert('Story berhasil dihapus.'); fetchUserStories(); } else { const result = await response.json(); alert(result.message || 'Gagal menghapus story.'); } } catch (error) { alert('Terjadi kesalahan jaringan saat menghapus story.'); } }
+        async function archiveStory(storyId) { try { const response = await fetch(`/api/stories/${storyId}/archive`, { method: 'PUT' }); if (response.ok) { alert('Story berhasil diarsipkan.'); fetchUserStories(); } else { const result = await response.json(); alert(result.message || 'Gagal mengarsipkan story.'); } } catch (error) { alert('Terjadi kesalahan jaringan saat mengarsipkan story.'); } }
+        async function unarchiveStory(storyId) { try { const response = await fetch(`/api/stories/${storyId}/unarchive`, { method: 'PUT' }); if (response.ok) { alert('Story berhasil dikembalikan dari arsip dan akan aktif selama 24 jam.'); fetchUserStories(); } else { const result = await response.json(); alert(result.message || 'Gagal mengembalikan story.'); } } catch (error) { alert('Terjadi kesalahan jaringan saat mengembalikan story.'); } }
 
         const socket = io({ autoConnect: true });
-        socket.on('connect', () => { }); socket.on('disconnect', (reason) => { }); socket.on('connect_error', (err) => { if (err.message === 'Authentication required' || err.message === 'Unauthorized') { setTimeout(() => { window.location.href = '/'; }, 2000); } });
+        socket.on('connect', () => { console.log('Socket.io connected to inbox page'); }); 
+        socket.on('disconnect', (reason) => { console.log('Socket.io disconnected from inbox page:', reason); }); 
+        socket.on('connect_error', (err) => { console.error('Inbox Socket.io connection error:', err.message); if (err.message === 'Authentication required' || err.message === 'Unauthorized') { setTimeout(() => { window.location.href = '/'; }, 2000); } });
         socket.on('new_message', (newMessage) => { const messageItem = renderMessage(newMessage); const noMessagesLi = messageList.querySelector('#no-messages-placeholder'); const loadingLi = messageList.querySelector('#loading-placeholder'); if (noMessagesLi) { noMessagesLi.remove(); } if (loadingLi) { loadingLi.remove(); } messageList.insertBefore(messageItem, messageList.firstChild); fetchUserInfo(); });
         socket.on('update_unread_count', (data) => { updateUnreadIndicator(data.unreadCount || 0); });
         socket.on('messages_cleared', () => { messageList.innerHTML = ''; displayNoMessages(); });
-
-        Promise.all([fetchUserInfo(), fetchMessages()]).then(() => { startUserTourIfNew(); });
+        
+        if (tabsContainer) {
+            tabsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-button')) {
+                    const targetTab = e.target.dataset.tab;
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const targetContent = document.getElementById(targetTab);
+                    if(targetContent) targetContent.classList.add('active');
+                    if (targetTab === 'polling-tab' && typeof fetchMyPolls === "function") fetchMyPolls();
+                    else if (targetTab === 'stories-tab' && typeof fetchUserStories === "function") fetchUserStories();
+                    else if (targetTab === 'inbox-tab' && typeof fetchMessages === "function") { /* Mungkin tidak perlu fetch ulang kecuali ada trigger */ }
+                }
+            });
+        }
+        
+        Promise.all([fetchUserInfo(), fetchMessages()])
+            .then(() => {
+                if (typeof startUserTourIfNew === "function") startUserTourIfNew();
+                const initialActiveTabButton = document.querySelector('.tabs .tab-button.active');
+                if (initialActiveTabButton) {
+                    const activeTabName = initialActiveTabButton.dataset.tab;
+                    if (activeTabName === 'polling-tab' && typeof fetchMyPolls === "function") fetchMyPolls();
+                    else if (activeTabName === 'stories-tab' && typeof fetchUserStories === "function") fetchUserStories();
+                }
+            })
+            .catch(error => console.error("Error during initial data fetch for inbox:", error));
     </script>
 </body>
 </html>
